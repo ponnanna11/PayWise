@@ -108,11 +108,11 @@ def render_dashboard(db_path: str):
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "Proposal": st.column_config.TextColumn("Proposal ID", width="small"),
-                    "Title": st.column_config.TextColumn("Title", width="medium"),
+                    "Proposal": st.column_config.TextColumn("Proposal ID", width="medium"),
+                    "Title": st.column_config.TextColumn("Title", width="large"),
                     "Amount": st.column_config.TextColumn("Amount", width="small"),
                     "Status": st.column_config.TextColumn("Status", width="small"),
-                    "Source": st.column_config.TextColumn("Source", width="small"),
+                    "Source": st.column_config.TextColumn("Source", width="medium"),
                     "Created": st.column_config.TextColumn("Date", width="small"),
                 },
             )
@@ -157,9 +157,9 @@ def render_dashboard(db_path: str):
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "Timestamp": st.column_config.TextColumn("Timestamp", width="small"),
-                    "Event": st.column_config.TextColumn("Event", width="medium"),
-                    "Proposal": st.column_config.TextColumn("Proposal", width="small"),
+                    "Timestamp": st.column_config.TextColumn("Timestamp", width="medium"),
+                    "Event": st.column_config.TextColumn("Event", width="large"),
+                    "Proposal": st.column_config.TextColumn("Proposal", width="medium"),
                     "Actor": st.column_config.TextColumn("Actor", width="small"),
                     "Outcome": st.column_config.TextColumn("Outcome", width="small"),
                 },

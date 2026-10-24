@@ -11,13 +11,44 @@ def apply_custom_styles():
     st.markdown(
         """
         <style>
-        /* Import Inter font */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Import Inter and Material Symbols Rounded fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
-        /* Global Typography & Resets */
-        html, body, [class*="css"], .stMarkdown, .stText, p, span, label, div {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        /* Global Typography & Resets - Do not override span and div with !important to protect icon fonts */
+        html, body, .stApp {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #1F2937;
+        }
+
+        .stMarkdown, .stText, p, h1, h2, h3, h4, h5, h6, input, textarea, select, button {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        }
+
+        /* Preserve Streamlit Material Symbols Icon Font & Ligatures Everywhere */
+        [data-testid*="stIcon"],
+        [data-testid="stIconMaterial"],
+        [data-testid="stIconEmoji"],
+        [data-testid="stExpanderStepChevron"],
+        [data-testid*="Chevron"],
+        span[translate="no"],
+        span[data-testid="stIconMaterial"],
+        .material-symbols-rounded,
+        .material-symbols-outlined,
+        .material-icons {
+            font-family: "Material Symbols Rounded", "Material Symbols Outlined", sans-serif !important;
+            font-style: normal !important;
+            font-weight: normal !important;
+            text-transform: none !important;
+            letter-spacing: normal !important;
+            word-wrap: normal !important;
+            white-space: nowrap !important;
+            direction: ltr !important;
+            -webkit-font-feature-settings: 'liga' 1 !important;
+            font-feature-settings: 'liga' 1 !important;
+            -webkit-font-smoothing: antialiased !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         /* Base App Canvas */
@@ -449,6 +480,59 @@ def apply_custom_styles():
         /* Progress Bar */
         .stProgress > div > div > div > div {
             background-color: #2563EB !important;
+        }
+
+        /* Streamlit Expander - Clean card styling, no overlapping chevron text */
+        div[data-testid="stExpander"],
+        details[data-testid="stExpander"] {
+            background-color: #FFFFFF !important;
+            border: 1px solid #DCE6F5 !important;
+            border-radius: 10px !important;
+            margin-top: 0.75rem !important;
+            margin-bottom: 0.75rem !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02) !important;
+            overflow: hidden !important;
+        }
+
+        details[data-testid="stExpander"] > summary {
+            padding: 0.75rem 1rem !important;
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+            color: #172554 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.65rem !important;
+            cursor: pointer !important;
+        }
+
+        details[data-testid="stExpander"] > summary:hover {
+            background-color: #F8FAFC !important;
+            color: #2563EB !important;
+        }
+
+        details[data-testid="stExpander"] > summary [data-testid="stExpanderStepChevron"],
+        details[data-testid="stExpander"] > summary span[data-testid*="stIcon"],
+        details[data-testid="stExpander"] > summary svg {
+            flex-shrink: 0 !important;
+            min-width: 1.25rem !important;
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin-right: 0.25rem !important;
+        }
+
+        details[data-testid="stExpander"] > summary p,
+        details[data-testid="stExpander"] > summary span {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        details[data-testid="stExpander"] div[data-testid="stExpanderDetails"] {
+            padding: 1rem 1.25rem !important;
+            border-top: 1px solid #EDF2F7 !important;
+            background-color: #FFFFFF !important;
         }
         </style>
         """,

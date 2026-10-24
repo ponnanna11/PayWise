@@ -52,16 +52,16 @@ def render_ledger_view(db_path: str):
             use_container_width=True,
             hide_index=True,
             column_config={
-                "Account ID": st.column_config.TextColumn("Account ID", width="small"),
-                "Bank Institution": st.column_config.TextColumn("Bank", width="small"),
+                "Account ID": st.column_config.TextColumn("Account ID", width="medium"),
+                "Bank Institution": st.column_config.TextColumn("Bank", width="medium"),
                 "Account Name": st.column_config.TextColumn("Account Name", width="medium"),
-                "Account Number": st.column_config.TextColumn("Account #", width="small"),
+                "Account Number": st.column_config.TextColumn("Account #", width="medium"),
                 "Current Balance": st.column_config.TextColumn("Current Balance", width="small"),
                 "Mandatory Reserve": st.column_config.TextColumn("Mandatory Reserve", width="small"),
                 "Available Funds": st.column_config.TextColumn("Available Funds", width="small"),
                 "Status": st.column_config.TextColumn("Status", width="small"),
                 "Version": st.column_config.TextColumn("Version", width="small"),
-                "Last Updated": st.column_config.TextColumn("Last Updated", width="small"),
+                "Last Updated": st.column_config.TextColumn("Last Updated", width="medium"),
             },
         )
 
@@ -86,15 +86,15 @@ def render_ledger_view(db_path: str):
             use_container_width=True,
             hide_index=True,
             column_config={
-                "Supplier ID": st.column_config.TextColumn("Supplier ID", width="small"),
-                "Legal Name": st.column_config.TextColumn("Legal Name", width="medium"),
-                "GSTIN": st.column_config.TextColumn("GSTIN", width="small"),
+                "Supplier ID": st.column_config.TextColumn("Supplier ID", width="medium"),
+                "Legal Name": st.column_config.TextColumn("Legal Name", width="large"),
+                "GSTIN": st.column_config.TextColumn("GSTIN", width="medium"),
                 "PAN": st.column_config.TextColumn("PAN", width="small"),
                 "IFSC Code": st.column_config.TextColumn("IFSC Code", width="small"),
                 "Bank Account Number": st.column_config.TextColumn("Bank Account #", width="medium"),
                 "Compliance Status": st.column_config.TextColumn("Status", width="small"),
                 "Risk Tier": st.column_config.TextColumn("Risk Tier", width="small"),
-                "Category": st.column_config.TextColumn("Category", width="small"),
+                "Category": st.column_config.TextColumn("Category", width="medium"),
             },
         )
 
@@ -119,15 +119,15 @@ def render_ledger_view(db_path: str):
             use_container_width=True,
             hide_index=True,
             column_config={
-                "Invoice ID": st.column_config.TextColumn("Invoice ID", width="small"),
-                "Invoice Reference #": st.column_config.TextColumn("Reference #", width="small"),
-                "Supplier ID": st.column_config.TextColumn("Supplier ID", width="small"),
+                "Invoice ID": st.column_config.TextColumn("Invoice ID", width="medium"),
+                "Invoice Reference #": st.column_config.TextColumn("Reference #", width="medium"),
+                "Supplier ID": st.column_config.TextColumn("Supplier ID", width="medium"),
                 "Invoice Amount": st.column_config.TextColumn("Amount", width="small"),
                 "Issue Date": st.column_config.TextColumn("Issue Date", width="small"),
                 "Due Date": st.column_config.TextColumn("Due Date", width="small"),
                 "Status": st.column_config.TextColumn("Status", width="small"),
                 "Description": st.column_config.TextColumn("Description", width="large"),
-                "Paid Timestamp": st.column_config.TextColumn("Paid Date", width="small"),
+                "Paid Timestamp": st.column_config.TextColumn("Paid Date", width="medium"),
             },
         )
 
