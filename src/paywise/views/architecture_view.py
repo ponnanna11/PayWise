@@ -5,7 +5,6 @@ and embedded PlantUML architecture diagrams.
 """
 from pathlib import Path
 import os
-import textwrap
 import streamlit as st
 from paywise.config import AI_MODEL, AI_PROVIDER, DB_PATH, DEFAULT_CURRENCY, GEMINI_API_KEY
 from paywise.services.ai_adapter import AIAdapter
@@ -45,21 +44,21 @@ def render_architecture_view():
     with st.container(border=True):
         st.markdown("### 🛡️ Core Operating Principle")
         
-        box_markup = textwrap.dedent("""
-            <div style="font-size:1.05rem; font-weight:600; color:#172554; background-color:#EFF6FF; padding:1.1rem; border-radius:8px; border-left:4px solid #2563EB; margin-bottom:1rem;">
-                "AI proposes. PayWise simulates. Policies enforce. Humans approve. Revalidation protects."
-            </div>
-            <div style="color:#374151; font-size:0.925rem; line-height:1.6;">
-                PayWise operates as a <b>pre-execution safety gateway</b> for AI-assisted financial operations in an isolated virtual sandbox:
-                <ul style="margin-top:0.5rem; margin-bottom:0.5rem;">
-                    <li>The AI must <b>never directly modify the ledger</b>.</li>
-                    <li>The AI must <b>never bypass the policy engine</b>.</li>
-                    <li>The AI must <b>never grant itself approval</b>.</li>
-                    <li>The AI must <b>never activate its own proposed policies</b>.</li>
-                    <li>Every commit undergoes <b>cryptographic commit-time revalidation</b> to prevent stale state execution.</li>
-                </ul>
-            </div>
-        """).strip()
+        box_markup = (
+            '<div style="font-size:1.05rem; font-weight:600; color:#172554; background-color:#EFF6FF; padding:1.1rem; border-radius:8px; border-left:4px solid #2563EB; margin-bottom:1rem;">'
+            '"AI proposes. PayWise simulates. Policies enforce. Humans approve. Revalidation protects."'
+            '</div>'
+            '<div style="color:#374151; font-size:0.925rem; line-height:1.6;">'
+            'PayWise operates as a <b>pre-execution safety gateway</b> for AI-assisted financial operations in an isolated virtual sandbox:'
+            '<ul style="margin-top:0.5rem; margin-bottom:0.5rem;">'
+            '<li>The AI must <b>never directly modify the ledger</b>.</li>'
+            '<li>The AI must <b>never bypass the policy engine</b>.</li>'
+            '<li>The AI must <b>never grant itself approval</b>.</li>'
+            '<li>The AI must <b>never activate its own proposed policies</b>.</li>'
+            '<li>Every commit undergoes <b>cryptographic commit-time revalidation</b> to prevent stale state execution.</li>'
+            '</ul>'
+            '</div>'
+        )
         st.markdown(box_markup, unsafe_allow_html=True)
 
     # Architecture Diagrams

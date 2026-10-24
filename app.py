@@ -5,7 +5,6 @@ Main Streamlit Application Entrypoint
 """
 import os
 import sys
-import textwrap
 from pathlib import Path
 
 # Ensure src is in Python path for local execution and Streamlit
@@ -94,12 +93,12 @@ with st.sidebar:
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
     st.markdown("---")
 
-    footer_markup = textwrap.dedent("""
-        <div style="font-size: 0.825rem; color: #526581; line-height: 1.5; background: #F5F8FF; padding: 0.85rem; border-radius: 8px; border: 1px solid #DCE6F5;">
-            <b style="color:#172554;">Core Safety Invariant:</b><br>
-            <i>AI proposes. PayWise simulates. Policies enforce. Humans approve. Revalidation protects.</i>
-        </div>
-    """).strip()
+    footer_markup = (
+        '<div style="font-size: 0.825rem; color: #526581; line-height: 1.5; background: #F5F8FF; padding: 0.85rem; border-radius: 8px; border: 1px solid #DCE6F5;">'
+        '<b style="color:#172554;">Core Safety Invariant:</b><br>'
+        '<i>AI proposes. PayWise simulates. Policies enforce. Humans approve. Revalidation protects.</i>'
+        '</div>'
+    )
     st.markdown(footer_markup, unsafe_allow_html=True)
     st.caption("PayWise v1.0.0 • SQLite • Simulation Only")
 

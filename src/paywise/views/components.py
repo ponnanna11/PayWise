@@ -4,7 +4,6 @@ Enforces consistent visual hierarchy, accessible contrast, semantic status indic
 standard light-fintech layout patterns, and eliminates markdown code-block parsing bugs.
 """
 import html
-import textwrap
 from typing import Any, Dict, Optional
 import streamlit as st
 from paywise.utils.formatters import format_inr
@@ -72,32 +71,71 @@ def render_severity_callout(
 ):
     """
     Renders structured policy engine finding callout as a clean light card.
-    Uses continuous contiguous HTML so markdown parsers never mistake it for a code block.
+    Uses native Streamlit containers to eliminate markdown parsing errors,
+    prevent raw HTML leaks, and guarantee strict column boundary containment.
     """
     sev = str(severity).upper()
-    card_cls = "pw-finding-block" if sev == "BLOCK" else "pw-finding-approval" if sev == "REQUIRE_APPROVAL" else "pw-finding-warn"
-    badge_cls = "pw-badge-block" if sev == "BLOCK" else "pw-badge-approval" if sev == "REQUIRE_APPROVAL" else "pw-badge-warn"
-    icon = "🛑" if sev == "BLOCK" else "⚠️" if sev == "REQUIRE_APPROVAL" else "ℹ️"
-
-    pid_html = f"<span style='font-size:0.825rem; font-weight:600; color:#526581;'>{html.escape(policy_id)}</span>" if policy_id else ""
-    remedy_html = (
-        f"<div class='pw-finding-remedy'><b>Recommended Action:</b> {html.escape(recommended_action)}</div>"
-        if recommended_action
-        else ""
+    is_block = sev in ["BLOCK", "REJECTED", "FAILED", "ERROR"]
+    is_approval = sev in ["REQUIRE_APPROVAL", "NEEDS_APPROVAL", "AWAITING_APPROVAL"]
+    badge_cls = (
+        "pw-badge-block"
+        if is_block
+        else "pw-badge-approval"
+        if is_approval
+        else "pw-badge-warn"
     )
-
-    markup = (
-        f'<div class="pw-finding-card {card_cls}">'
-        f'<div style="display:flex; justify-content:space-between; align-items:center;">'
-        f'<span class="pw-badge {badge_cls}">{icon} {sev}</span>'
-        f'{pid_html}'
-        f'</div>'
-        f'<div class="pw-finding-title">{html.escape(rule_name)}</div>'
-        f'<div class="pw-finding-desc">{html.escape(explanation)}</div>'
-        f'{remedy_html}'
-        f'</div>'
+    icon = "🛑" if is_block else "⏳" if is_approval else "ℹ️"
+    accent_color = (
+        "#DC2626"
+        if is_block
+        else "#D97706"
+        if is_approval
+        else "#2563EB"
     )
-    st.markdown(markup, unsafe_allow_html=True)
+    display_label = "BLOCK" if is_block else "REQUIRE APPROVAL" if is_approval else sev
+
+    clean_rule = html.unescape(str(rule_name))
+    clean_expl = html.unescape(str(explanation))
+    clean_action = html.unescape(str(recommended_action)) if recommended_action else ""
+
+    with st.container(border=True):
+        st.markdown(
+            f'<div style="height:3px; background-color:{accent_color}; border-radius:2px; margin-bottom:0.5rem;"></div>',
+            unsafe_allow_html=True,
+        )
+        if policy_id:
+            c_badge, c_pid = st.columns([3, 1])
+            with c_badge:
+                st.markdown(
+                    f'<span class="pw-badge {badge_cls}">{icon} {display_label}</span>',
+                    unsafe_allow_html=True,
+                )
+            with c_pid:
+                st.markdown(
+                    f'<div style="text-align:right; font-size:0.825rem; font-weight:600; color:#526581; line-height:1.8;">{html.escape(policy_id, quote=False)}</div>',
+                    unsafe_allow_html=True,
+                )
+        else:
+            st.markdown(
+                f'<span class="pw-badge {badge_cls}">{icon} {display_label}</span>',
+                unsafe_allow_html=True,
+            )
+
+        st.markdown(
+            f'<div style="font-weight:600; font-size:1.025rem; color:#172554; margin:0.35rem 0 0.25rem 0; line-height:1.35;">{html.escape(clean_rule, quote=False)}</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            f'<div style="font-size:0.925rem; color:#374151; line-height:1.5;">{html.escape(clean_expl, quote=False)}</div>',
+            unsafe_allow_html=True,
+        )
+
+        if clean_action:
+            st.markdown(
+                f'<div style="margin-top:0.45rem; padding:0.5rem 0.75rem; background:#F8FAFC; border-left:3px solid #2563EB; border-radius:4px; font-size:0.85rem; color:#1E293B;"><b>Recommended Action:</b> {html.escape(clean_action, quote=False)}</div>',
+                unsafe_allow_html=True,
+            )
+
 
 
 def render_before_after_comparison(

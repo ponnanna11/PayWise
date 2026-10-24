@@ -5,7 +5,6 @@ and a deterministic manual transaction builder.
 """
 from datetime import date, timedelta
 import streamlit as st
-import textwrap
 from pydantic import ValidationError
 from paywise.models.proposal import (
     ProposalCreate,
@@ -54,14 +53,14 @@ def render_new_proposal_view(db_path: str):
     with tab_agent:
         st.subheader("AI-Assisted Proposal Drafting")
         
-        info_markup = textwrap.dedent("""
-            <div style="background:#FFFFFF; border:1px solid #DCE6F5; border-left:4px solid #2563EB; padding:1.1rem 1.35rem; border-radius:10px; margin-bottom:1.25rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);">
-                <div style="font-weight:600; font-size:0.95rem; color:#172554; margin-bottom:0.25rem;">Safety Invariant & Architecture:</div>
-                <div style="font-size:0.9rem; color:#374151; line-height:1.5;">
-                    The AI drafts candidate proposals from plain English instructions. PayWise's deterministic engine independently verifies schemas, computes in-memory consequence simulations, and enforces mandatory policy rules before any human authorization or commit.
-                </div>
-            </div>
-        """).strip()
+        info_markup = (
+            '<div style="background:#FFFFFF; border:1px solid #DCE6F5; border-left:4px solid #2563EB; padding:1.1rem 1.35rem; border-radius:10px; margin-bottom:1.25rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);">'
+            '<div style="font-weight:600; font-size:0.95rem; color:#172554; margin-bottom:0.25rem;">Safety Invariant & Architecture:</div>'
+            '<div style="font-size:0.9rem; color:#374151; line-height:1.5;">'
+            'The AI drafts candidate proposals from plain English instructions. PayWise\'s deterministic engine independently verifies schemas, computes in-memory consequence simulations, and enforces mandatory policy rules before any human authorization or commit.'
+            '</div>'
+            '</div>'
+        )
         st.markdown(info_markup, unsafe_allow_html=True)
 
         agent_prompt = st.text_area(

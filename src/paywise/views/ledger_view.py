@@ -2,7 +2,6 @@
 Simulated Ledger View for PayWise.
 Displays simulated bank accounts, supplier directory, and accounts payable invoices.
 """
-import textwrap
 import streamlit as st
 import pandas as pd
 from paywise.repositories.account_repo import AccountRepository
