@@ -1,0 +1,100 @@
+@startuml system_architecture
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Segoe UI
+skinparam roundCorner 8
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+title PayWise — Pre-execution Financial Safety Gateway Architecture
+
+actor "Finance User / Operator" as User
+actor "Approving Officer (CFO/Manager)" as Approver
+component "Autonomous AI Agent\n(Untrusted Proposer)" as AIAgent
+
+package "Presentation Layer (Streamlit UI)" #F8FAFC {
+    component "Dashboard & Metrics" as UIDash
+    component "Proposal Entry & Batch Loader" as UIProp
+    component "Consequence Preview Panel" as UIPrev
+    component "Approval Console" as UIAppr
+    component "Policy Management Studio" as UIPol
+    component "Simulated Ledger & Invoices" as UILedger
+    component "Audit Log Explorer" as UIAudit
+}
+
+package "Application & AI Adapter Layer" #EFF6FF {
+    component "Proposal Service" as SvcProp
+    component "Policy Service" as SvcPol
+    component "AI Proposal & Drafting Adapter\n(Untrusted Draft Generator)" as AIAdapter
+    component "Approval Service" as SvcAppr
+    component "Commit Service" as SvcCommit
+}
+
+package "Safety Gateway & Deterministic Engines" #FEF3C7 {
+    component "Pydantic Schema Validator" as SchemaVal
+    component "Simulation Engine\nS' = f(S, A)" as SimEngine
+    component "Policy Engine\nR = g(S, S', A, P)\n(15 Deterministic Rules)" as PolEngine
+    component "Commit-Time Revalidation Guard\n(Stale State, Tamper & Hash Checks)" as RevalGuard
+    component "Cryptographic Hasher\n(SHA-256 Canonical Binding)" as Hasher
+}
+
+package "Persistence Layer (SQLite DB)" #ECFDF5 {
+    database "accounts (Ledger Balances)" as DBAcc
+    database "suppliers (KYC & Risk)" as DBSup
+    database "invoices (Accounts Payable)" as DBInv
+    database "proposals & transactions" as DBProp
+    database "policies (Rules & Thresholds)" as DBPol
+    database "approvals (Signed Hashes)" as DBAppr
+    database "simulated_commits (Idempotency)" as DBCommit
+    database "audit_events (Immutable Trail)" as DBAudit
+}
+
+' Connections
+User --> UIDash
+User --> UIProp
+User --> UIPrev
+Approver --> UIAppr
+User --> UIPol
+User --> UILedger
+User --> UIAudit
+
+AIAgent ..> AIAdapter : Proposes payment draft
+AIAdapter --> SchemaVal : Untrusted candidate
+UIProp --> SvcProp
+UIPrev --> SvcProp
+UIAppr --> SvcAppr
+UIPol --> SvcPol
+UIAudit --> SvcCommit
+
+SvcProp --> SchemaVal
+SchemaVal --> SimEngine : Validated draft
+SimEngine --> PolEngine : Virtual State S'
+PolEngine --> UIPrev : Structured Findings (BLOCK/WARN/REQUIRE_APPROVAL)
+SvcAppr --> Hasher : Binds proposal, preview, ledger, policy hashes
+SvcAppr --> DBAppr : Persists valid sign-off
+
+UIPrev --> SvcCommit : User clicks "Simulated Commit"
+SvcCommit --> RevalGuard : Trigger 10-step revalidation
+RevalGuard --> DBAcc : Reload latest state
+RevalGuard --> DBPol : Reload active rules
+RevalGuard --> Hasher : Verify hash integrity
+RevalGuard --> SimEngine : Re-simulate fresh
+RevalGuard --> PolEngine : Re-evaluate policies
+RevalGuard --> SvcCommit : Passed Revalidation
+
+SvcCommit --> DBAcc : Atomic Balance Update (Optimistic Lock)
+SvcCommit --> DBInv : Mark Invoices PAID
+SvcCommit --> DBCommit : Record Commit (Idempotency Key)
+SvcCommit --> DBAudit : Record Immutable Audit Event
+SvcProp --> DBAudit
+SvcAppr --> DBAudit
+SvcPol --> DBAudit
+
+note right of AIAgent
+    **Core Safety Invariant**:
+    AI NEVER touches ledger.
+    AI NEVER self-approves.
+    AI NEVER activates policies.
+end note
+
+@enduml

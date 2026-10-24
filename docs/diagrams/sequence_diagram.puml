@@ -1,0 +1,86 @@
+@startuml sequence_diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Segoe UI
+skinparam roundCorner 8
+skinparam shadowing false
+autonumber
+
+actor "Finance User" as User
+actor "Finance Manager / CFO" as Approver
+boundary "Streamlit UI" as UI
+control "Proposal Service" as PropSvc
+control "Simulation Engine" as SimEng
+control "Policy Engine" as PolEng
+control "Approval Service" as ApprSvc
+control "Commit Service" as CommitSvc
+control "Revalidation Guard" as RevalSvc
+database "SQLite DB" as DB
+entity "Audit Repository" as Audit
+
+== 1. Proposal Creation & Deterministic Simulation ==
+User -> UI : Submit payment proposal batch
+UI -> PropSvc : create_proposal(ProposalCreate)
+PropSvc -> DB : INSERT proposal & transactions (DRAFT)
+PropSvc -> Audit : log(PROPOSAL_CREATED)
+UI -> PropSvc : run_simulation(proposal_id)
+PropSvc -> DB : SELECT account, invoices, active policies
+PropSvc -> SimEng : simulate(account, proposal, invoices)
+SimEng --> PropSvc : return SimulationPreview (S')
+PropSvc -> PolEng : evaluate(account, preview, proposal, policies)
+PolEng --> PropSvc : return findings [BLOCK / REQUIRE_APPROVAL / WARN]
+PropSvc -> DB : save_preview(preview)
+PropSvc -> Audit : log(SIMULATION_GENERATED)
+PropSvc --> UI : display Consequence Preview & Findings
+
+== 2. Role-Aware Cryptographic Approval ==
+opt Requires Approval (e.g. Amount > ₹50,000)
+    Approver -> UI : Review consequence preview & findings
+    Approver -> UI : Authorize proposal ("APPROVED", justification)
+    UI -> ApprSvc : process_approval(ApprovalCreate)
+    ApprSvc -> DB : INSERT approval (bound to proposal_hash, preview_hash, ledger_hash, policy_hash)
+    ApprSvc -> DB : UPDATE proposal status = 'APPROVED'
+    ApprSvc -> Audit : log(APPROVAL_GRANTED)
+    ApprSvc --> UI : Approval confirmation
+end
+
+== 3. Commit-Time Revalidation & Failure Scenario (Stale State) ==
+group Alternative Path: Stale State Detected
+    User -> UI : Click "Simulated Commit"
+    UI -> CommitSvc : commit_proposal(proposal_id)
+    CommitSvc -> RevalSvc : revalidate(proposal_id)
+    RevalSvc -> DB : Reload latest account balance & invoice status
+    note over RevalSvc
+        Ledger balance changed since preview!
+        Current ledger_state_hash != approved ledger_state_hash
+    end note
+    RevalSvc -> Audit : log(REVALIDATION_FAILED, outcome='FAILED')
+    RevalSvc --> CommitSvc : RevalidationResult(is_valid=False, reason="Stale state")
+    CommitSvc --> UI : Error: Commit-time revalidation failed. New preview required.
+end
+
+== 4. Successful Atomic Simulated Commit ==
+group Success Path: Certified Revalidation & Atomic Update
+    User -> UI : Re-run preview & re-approve proposal
+    User -> UI : Click "Simulated Commit"
+    UI -> CommitSvc : commit_proposal(proposal_id)
+    CommitSvc -> RevalSvc : revalidate(proposal_id)
+    RevalSvc -> DB : Reload latest state, policies, hashes
+    RevalSvc -> SimEng : Re-run simulation
+    RevalSvc -> PolEng : Re-run policy engine (is_commit_check=True)
+    RevalSvc --> CommitSvc : RevalidationResult(is_valid=True)
+    
+    CommitSvc -> DB : BEGIN IMMEDIATE TRANSACTION
+    CommitSvc -> DB : UPDATE accounts SET current_balance = ?, version = version + 1 WHERE version = ?
+    CommitSvc -> DB : UPDATE invoices SET status = 'PAID'
+    CommitSvc -> DB : UPDATE proposed_transactions SET status = 'COMMITTED'
+    CommitSvc -> DB : INSERT simulated_commits (Enforces Idempotency)
+    CommitSvc -> DB : UPDATE proposals SET status = 'COMMITTED_SIMULATED'
+    CommitSvc -> Audit : log(SIMULATED_COMMIT_SUCCEEDED)
+    CommitSvc -> DB : COMMIT TRANSACTION
+    
+    CommitSvc --> UI : Commit Success (commit_id, new_balance)
+    UI --> User : Display updated balance & settlement confirmation
+end
+
+@enduml

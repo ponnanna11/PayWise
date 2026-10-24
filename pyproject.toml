@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "paywise"
+version = "1.0.0"
+description = "AI-Assisted Financial Action Safety Simulator - Simulate Before You Pay"
+readme = "README.md"
+authors = [{ name = "PayWise Engineering Team" }]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+    "streamlit>=1.35.0",
+    "pydantic>=2.5.0",
+    "pandas>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "altair>=5.0.0",
+    "requests>=2.31.0",
+    "google-genai>=2.0.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

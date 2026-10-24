@@ -1,0 +1,102 @@
+@startuml activity_diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Segoe UI
+skinparam roundCorner 8
+skinparam shadowing false
+
+title PayWise — End-to-End Financial Action Safety Lifecycle
+
+start
+
+:Receive Financial Proposal\n(Manual User Entry or AI Agent Draft);
+
+:Validate Schema & Constraints via Pydantic\n(Amounts > 0, currency ISO, positive dates);
+
+if (Is Input Valid?) then (no)
+    :Log PROPOSAL_VALIDATION_FAILED in Audit Trail;
+    :Display Validation Errors to User;
+    stop
+else (yes)
+    :Persist Proposal in DRAFT status;
+    :Compute Initial Canonical Proposal Hash (SHA-256);
+endif
+
+partition "Simulation Engine" {
+    :Read Persistent Ledger State (Account S);
+    :Clone State into Virtual Memory Sandbox;
+    :Calculate Projected State S' = f(S, A)\n(Projected balance, available funds, total outflow);
+}
+
+partition "Policy Engine" {
+    :Load Active Policy Definitions & Parameters P;
+    :Evaluate Deterministic Rules R = g(S, S', A, P)\n(Reserve check, duplicate invoices, budget limits, split detection, etc.);
+    :Generate Structured Findings with Explanations & Actions;
+}
+
+:Display Interactive Consequence Preview\n(Before vs After, Outflows, Policy Violations, Warnings);
+
+if (Any BLOCK findings detected?) then (yes)
+    :Set Proposal Status to BLOCKED;
+    :Disable Commit Actions;
+    :Log POLICY_VIOLATION_DETECTED;
+    stop
+endif
+
+if (Any REQUIRE_APPROVAL findings detected?) then (yes)
+    :Set Status to AWAITING_APPROVAL;
+    :Route to Authorized Approver (CFO / Manager);
+    
+    if (Approver Decision?) then (REJECTED)
+        :Set Status to REJECTED;
+        :Log APPROVAL_REJECTED;
+        stop
+    else (APPROVED)
+        :Cryptographically Bind Approval;\n(Record Proposal Hash, Preview Hash, Ledger Hash, Policy Hash);
+        :Set Status to APPROVED;
+        :Log APPROVAL_GRANTED;
+    endif
+else (no approval needed)
+    :Set Status to SIMULATED;
+endif
+
+:User / Operator Triggers Simulated Commit;
+
+partition "Commit-Time Revalidation Guard (Critical Section)" {
+    :1. Reload Latest Ledger State from SQLite;
+    :2. Reload Latest Active Policies from SQLite;
+    :3. Verify Proposal Hash Unchanged (Detect Post-Approval Tamper);
+    :4. Verify Required Approval is Present & Decision == APPROVED;
+    :5. Verify Ledger State Hash Matches Approved Preview Hash;
+    :6. Verify Policy Set Hash Matches Approved Preview Hash;
+    :7. Re-run Simulation on Fresh State;
+    :8. Re-evaluate Policy Rules on Fresh State;
+
+    if (Revalidation Checks Pass?) then (no)
+        :Set Proposal Status to STALE or BLOCKED;
+        :Invalidate Prior Approvals;
+        :Log REVALIDATION_FAILED in Audit Trail;
+        :Reject Commit Request;
+        :Require New Simulation Preview & Fresh Approval;
+        stop
+    else (yes)
+        :Revalidation Certified;
+    endif
+}
+
+partition "Atomic Simulated Commit (SQLite Transaction)" {
+    :BEGIN IMMEDIATE TRANSACTION;
+    :Deduct Ledger Balance with Optimistic Concurrency Lock\n(UPDATE accounts SET current_balance = ?, version = version + 1 WHERE version = ?);
+    :Mark Invoices as PAID in Payables Ledger;
+    :Update Proposed Transactions to COMMITTED;
+    :Insert Unique Simulated Commit Record (Enforce Idempotency);
+    :Set Proposal Status to COMMITTED_SIMULATED;
+    :Insert Immutable SIMULATED_COMMIT_SUCCEEDED Audit Record;
+    :COMMIT TRANSACTION;
+}
+
+:Present Successful Commit Confirmation & Updated Balance;
+
+stop
+
+@enduml

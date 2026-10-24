@@ -1,0 +1,82 @@
+@startuml dfd_level1
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Segoe UI
+skinparam roundCorner 8
+skinparam shadowing false
+
+title PayWise — Data Flow Diagram (DFD) Level 1
+
+' External Entities
+rectangle "Finance User / Operator" as ExtUser #E0F2FE
+rectangle "Approving Manager / CFO" as ExtApprover #FEF08A
+rectangle "Autonomous AI Agent\n(Untrusted Proposer)" as ExtAI #FEE2E2
+
+' Processes
+rectangle "1.0\nProposal Intake\n& Schema Validation" as P1 #F1F5F9
+rectangle "2.0\nDeterministic\nSimulation Engine\nS' = f(S, A)" as P2 #F1F5F9
+rectangle "3.0\nDeterministic\nPolicy Engine\nR = g(S, S', A, P)" as P3 #F1F5F9
+rectangle "4.0\nConsequence Preview\n& Risk Synthesis" as P4 #F1F5F9
+rectangle "5.0\nCryptographic\nApproval Binding" as P5 #F1F5F9
+rectangle "6.0\nCommit-Time\nRevalidation Guard" as P6 #F1F5F9
+rectangle "7.0\nAtomic Simulated\nCommit Execution" as P7 #F1F5F9
+rectangle "8.0\nPolicy Management\n& Rule Verification" as P8 #F1F5F9
+rectangle "9.0\nImmutable Audit\nTrail Logger" as P9 #F1F5F9
+
+' Data Stores
+database "D1 Accounts Ledger" as D1 #DCFCE7
+database "D2 Suppliers Directory" as D2 #DCFCE7
+database "D3 Invoices (Payables)" as D3 #DCFCE7
+database "D4 Proposals & Transactions" as D4 #DCFCE7
+database "D5 Active Policies & Rules" as D5 #DCFCE7
+database "D6 Approvals (Signed Hashes)" as D6 #DCFCE7
+database "D7 Simulated Commits" as D7 #DCFCE7
+database "D8 Audit Trail Events" as D8 #DCFCE7
+
+' Data Flows
+ExtUser --> P1 : Payment proposal / batch
+ExtAI --> P1 : Candidate draft (untrusted)
+P1 --> D4 : Validated proposal (DRAFT)
+P1 --> P9 : Proposal created / invalid log
+
+D1 --> P2 : Account ledger state (S)
+D4 --> P2 : Proposed transactions (A)
+P2 --> P3 : Projected balance & outflow (S')
+P2 --> D4 : Save simulation preview
+
+D5 --> P3 : Active rules & thresholds (P)
+D2 --> P3 : Supplier KYC & risk data
+D3 --> P3 : Invoice statuses & amounts
+P3 --> P4 : Structured findings (BLOCK, WARN, REQUIRE_APPROVAL)
+
+P4 --> ExtUser : Visual preview & violation alerts
+P4 --> ExtApprover : Escalate high-risk / threshold proposals
+
+ExtApprover --> P5 : Sign-off & audit justification
+D4 --> P5 : Proposal & preview hashes
+D1 --> P5 : Current ledger hash
+D5 --> P5 : Current policy set hash
+P5 --> D6 : Persist approval record
+P5 --> D4 : Update status to APPROVED
+P5 --> P9 : Log approval granted / rejected
+
+ExtUser --> P6 : Trigger simulated commit
+D4 --> P6 : Proposal & transactions
+D6 --> P6 : Approval record
+D1 --> P6 : Latest ledger state
+D5 --> P6 : Latest active policies
+P6 --> P9 : Log revalidation outcome
+
+P6 --> P7 : Certified revalidation token
+P7 --> D1 : Atomic balance deduction (Optimistic lock)
+P7 --> D3 : Mark invoices as PAID
+P7 --> D4 : Update status to COMMITTED_SIMULATED
+P7 --> D7 : Record commit (Idempotency)
+P7 --> P9 : Log commit success
+P7 --> ExtUser : Disbursement confirmation
+
+ExtUser --> P8 : Add/Edit policy thresholds
+P8 --> D5 : Verified policy updates
+P8 --> P9 : Log policy created/toggled
+
+@enduml
