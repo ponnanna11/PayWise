@@ -68,11 +68,21 @@ def render_dashboard(db_path: str):
             with st.container(border=True):
                 c1, c2 = st.columns([1.4, 1])
                 with c1:
-                    st.markdown(f"**{acc.account_name}**")
-                    st.caption(f"{acc.bank_name} • Account ending in `...{acc.account_number[-4:]}`")
+                    st.markdown(
+                        f"<div style='display:flex; flex-direction:column; justify-content:center; min-height:46px;'>"
+                        f"<div style='font-weight:600; font-size:1.05rem; color:#172554; line-height:1.3;'>{acc.account_name}</div>"
+                        f"<div style='font-size:0.825rem; color:#526581; line-height:1.4; margin-top:2px;'>{acc.bank_name} • Account ending in <code style='font-size:0.8rem;'>...{acc.account_number[-4:]}</code></div>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
                 with c2:
-                    st.markdown(f"<div style='text-align:right; font-weight:700; font-size:1.15rem; color:#172554;'>{format_inr(acc.current_balance)}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='text-align:right; font-size:0.825rem; color:#15803D; font-weight:500;'>Available: {format_inr(acc.available_funds)}</div>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div style='display:flex; flex-direction:column; justify-content:center; align-items:flex-end; min-height:46px; text-align:right;'>"
+                        f"<div style='font-weight:700; font-size:1.15rem; color:#172554; line-height:1.3;'>{format_inr(acc.current_balance)}</div>"
+                        f"<div style='font-size:0.825rem; color:#15803D; font-weight:600; line-height:1.4; margin-top:2px;'>Available: {format_inr(acc.available_funds)}</div>"
+                        f"</div>",
+                        unsafe_allow_html=True,
+                    )
 
                 ratio = min(1.0, max(0.0, acc.reserved_balance / acc.current_balance)) if acc.current_balance > 0 else 0
                 st.progress(ratio, text=f"Mandatory Reserve: {format_inr(acc.reserved_balance)} ({ratio*100:.1f}%)")

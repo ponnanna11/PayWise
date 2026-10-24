@@ -80,17 +80,28 @@ def render_simulation_view(db_path: str):
     with st.container(border=True):
         p1, p2, p3 = st.columns([2.5, 1.2, 1.3])
         with p1:
-            st.markdown(f"### {proposal.title}")
-            st.caption(f"Proposal ID: `{proposal.id}` • Version: **v{proposal.version}** • Source: `{proposal.source}` • Account: `{proposal.account_id}`")
+            st.markdown(
+                f"<div class='pw-column-eyebrow'>DISBURSEMENT PROPOSAL</div>"
+                f"<div style='font-weight:700; font-size:1.25rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{proposal.title}</div>"
+                f"<div style='font-size:0.825rem; color:#526581; line-height:1.4;'>Proposal ID: <code style='font-size:0.8rem;'>{proposal.id}</code> • Version: <b>v{proposal.version}</b> • Source: <code style='font-size:0.8rem;'>{proposal.source}</code></div>",
+                unsafe_allow_html=True,
+            )
             if proposal.description:
-                st.write(proposal.description)
+                st.markdown(f"<div style='font-size:0.9rem; color:#374151; margin-top:0.35rem; line-height:1.45;'>{proposal.description}</div>", unsafe_allow_html=True)
         with p2:
-            st.markdown(f"<p style='font-size:0.825rem; color:#526581; margin-bottom:0.1rem; text-transform:uppercase; font-weight:600;'>Proposed Outflow</p>", unsafe_allow_html=True)
-            st.markdown(f"<div style='font-weight:700; font-size:1.4rem; color:#172554;'>{format_inr(preview.total_outflow)}</div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div class='pw-column-eyebrow-right'>PROPOSED OUTFLOW</div>"
+                f"<div style='text-align:right; font-weight:700; font-size:1.35rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{format_inr(preview.total_outflow)}</div>"
+                f"<div style='text-align:right; font-size:0.825rem; color:#526581; line-height:1.4;'>Disbursement Account: <code style='font-size:0.8rem;'>{proposal.account_id}</code></div>",
+                unsafe_allow_html=True,
+            )
         with p3:
-            st.markdown(f"<p style='font-size:0.825rem; color:#526581; margin-bottom:0.1rem; text-transform:uppercase; font-weight:600;'>Governance Status</p>", unsafe_allow_html=True)
-            st.markdown(f"{render_status_badge(status_val)}", unsafe_allow_html=True)
-            st.caption(f"Simulated: {format_date(preview.simulated_at)}")
+            st.markdown(
+                f"<div class='pw-column-eyebrow-right'>GOVERNANCE STATUS</div>"
+                f"<div style='text-align:right; margin:0.25rem 0 0.35rem 0;'>{render_status_badge(status_val)}</div>"
+                f"<div style='text-align:right; font-size:0.825rem; color:#526581; line-height:1.4;'>Simulated: {format_date(preview.simulated_at)}</div>",
+                unsafe_allow_html=True,
+            )
 
     # 2. Before-and-After Financial Comparison Grid
     st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)

@@ -99,15 +99,24 @@ def render_new_proposal_view(db_path: str):
             st.markdown("#### 📄 Candidate Proposal Draft (Awaiting Simulation)")
 
             with st.container(border=True):
-                c1, c2 = st.columns([2.5, 1])
+                c1, c2 = st.columns([2.5, 1.2])
                 with c1:
-                    st.markdown(f"**Title**: {candidate.title}")
-                    st.caption(f"Source: `{candidate.source}` • Initiator: `{candidate.created_by}`")
-                    st.write(candidate.description)
+                    st.markdown(
+                        f"<div class='pw-column-eyebrow'>CANDIDATE PROPOSAL DRAFT</div>"
+                        f"<div style='font-weight:700; font-size:1.25rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{candidate.title}</div>"
+                        f"<div style='font-size:0.825rem; color:#526581; line-height:1.4;'>Source: <code style='font-size:0.8rem;'>{candidate.source}</code> • Initiator: <code style='font-size:0.8rem;'>{candidate.created_by}</code></div>",
+                        unsafe_allow_html=True,
+                    )
+                    if candidate.description:
+                        st.markdown(f"<div style='font-size:0.9rem; color:#374151; margin-top:0.35rem; line-height:1.45;'>{candidate.description}</div>", unsafe_allow_html=True)
                 with c2:
                     total_cand = sum(t.amount for t in candidate.transactions)
-                    st.markdown(f"<div style='text-align:right; font-weight:700; font-size:1.4rem; color:#172554;'>{format_inr(total_cand)}</div>", unsafe_allow_html=True)
-                    st.caption(f"Account: `{candidate.account_id}` • Currency: `{candidate.currency}`")
+                    st.markdown(
+                        f"<div class='pw-column-eyebrow-right'>TOTAL PROPOSED</div>"
+                        f"<div style='text-align:right; font-weight:700; font-size:1.35rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{format_inr(total_cand)}</div>"
+                        f"<div style='text-align:right; font-size:0.825rem; color:#526581; line-height:1.4;'>Account: <code style='font-size:0.8rem;'>{candidate.account_id}</code> • <b>{candidate.currency}</b></div>",
+                        unsafe_allow_html=True,
+                    )
 
                 st.markdown("##### Line Items:")
                 for tx in candidate.transactions:

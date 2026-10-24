@@ -64,38 +64,47 @@ def render_proposals_view(db_path: str):
             h_col1, h_col2, h_col3 = st.columns([2.5, 1.2, 1.3])
 
             with h_col1:
-                st.markdown(f"### {prop.title}")
-                st.caption(f"ID: `{prop.id}` • Type: **{prop.proposal_type.value}** • Source: `{prop.source}` • Initiator: `{prop.created_by}`")
-                if prop.description:
-                    st.write(prop.description)
-
-            with h_col2:
-                st.markdown(f"<div style='text-align:right; font-weight:700; font-size:1.35rem; color:#172554;'>{format_inr(prop.total_amount)}</div>", unsafe_allow_html=True)
                 st.markdown(
-                    f"<div style='text-align:right; margin-top:0.35rem;'>{render_status_badge(prop.status.value)}</div>",
+                    f"<div class='pw-column-eyebrow'>FINANCIAL PROPOSAL</div>"
+                    f"<div style='font-weight:700; font-size:1.25rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{prop.title}</div>"
+                    f"<div style='font-size:0.825rem; color:#526581; line-height:1.4;'>ID: <code style='font-size:0.8rem;'>{prop.id}</code> • Type: <b>{prop.proposal_type.value}</b> • Source: <code style='font-size:0.8rem;'>{prop.source}</code></div>",
                     unsafe_allow_html=True,
                 )
+                if prop.description:
+                    st.markdown(f"<div style='font-size:0.9rem; color:#374151; margin-top:0.35rem; line-height:1.45;'>{prop.description}</div>", unsafe_allow_html=True)
+
+            with h_col2:
+                findings_html = ""
                 if findings_count > 0:
                     badge_color = "#DC2626" if has_block else "#D97706"
-                    st.markdown(
-                        f"<p style='font-size:0.825rem; text-align:right; color:{badge_color}; margin-top:0.35rem; font-weight:600;'>{findings_count} Policy Finding(s)</p>",
-                        unsafe_allow_html=True,
-                    )
+                    findings_html = f"<div style='font-size:0.8rem; text-align:right; color:{badge_color}; margin-top:0.25rem; font-weight:600;'>{findings_count} Policy Finding(s)</div>"
+
+                st.markdown(
+                    f"<div class='pw-column-eyebrow-right'>PROPOSED OUTFLOW</div>"
+                    f"<div style='text-align:right; font-weight:700; font-size:1.25rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{format_inr(prop.total_amount)}</div>"
+                    f"<div style='text-align:right;'>{render_status_badge(prop.status.value)}</div>"
+                    f"{findings_html}",
+                    unsafe_allow_html=True,
+                )
 
             with h_col3:
-                st.caption(f"Account: `{prop.account_id}`")
-                st.caption(f"Version: **v{prop.version}** • Date: {format_date(prop.created_at)}")
-
+                st.markdown(
+                    f"<div class='pw-column-eyebrow-right'>DISBURSEMENT ROUTE</div>"
+                    f"<div style='text-align:right; font-size:0.9rem; font-weight:600; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>Account: <code style='font-size:0.85rem;'>{prop.account_id}</code></div>"
+                    f"<div style='text-align:right; font-size:0.825rem; color:#526581; line-height:1.4;'>Version: <b>v{prop.version}</b> • {format_date(prop.created_at)}</div>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown("<div style='margin-top:0.5rem;'></div>", unsafe_allow_html=True)
                 btn_col1, btn_col2 = st.columns(2)
                 with btn_col1:
-                    if st.button("⚡ Simulate", key=f"sim_btn_{prop.id}", type="primary" if prop.status.value in ["DRAFT", "STALE"] else "secondary"):
+                    if st.button("⚡ Simulate", key=f"sim_btn_{prop.id}", type="primary" if prop.status.value in ["DRAFT", "STALE"] else "secondary", use_container_width=True):
                         with st.spinner("Executing simulation..."):
                             prop_service.run_simulation(prop.id, actor="operator_ui")
                             st.session_state["selected_proposal_id"] = prop.id
                             st.session_state["current_page"] = "Simulation & Preview"
                             st.rerun()
                 with btn_col2:
-                    if st.button("🔍 Details", key=f"view_btn_{prop.id}"):
+                    if st.button("🔍 Details", key=f"view_btn_{prop.id}", use_container_width=True):
                         st.session_state["selected_proposal_id"] = prop.id
                         st.session_state["current_page"] = "Simulation & Preview"
                         st.rerun()

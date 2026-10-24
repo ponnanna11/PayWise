@@ -65,13 +65,21 @@ def render_approvals_view(db_path: str):
             with st.container(border=True):
                 h1, h2 = st.columns([2.5, 1.2])
                 with h1:
-                    st.markdown(f"### {prop.title}")
-                    st.caption(f"Proposal ID: `{prop.id}` • Version: **v{prop.version}** • Status: {render_status_badge(prop.status.value)}")
+                    st.markdown(
+                        f"<div class='pw-column-eyebrow'>PENDING AUTHORIZATION</div>"
+                        f"<div style='font-weight:700; font-size:1.25rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{prop.title}</div>"
+                        f"<div style='font-size:0.825rem; color:#526581; line-height:1.4;'>Proposal ID: <code style='font-size:0.8rem;'>{prop.id}</code> • Version: <b>v{prop.version}</b> • Status: {render_status_badge(prop.status.value)}</div>",
+                        unsafe_allow_html=True,
+                    )
                     if prop.description:
-                        st.write(prop.description)
+                        st.markdown(f"<div style='font-size:0.9rem; color:#374151; margin-top:0.35rem; line-height:1.45;'>{prop.description}</div>", unsafe_allow_html=True)
                 with h2:
-                    st.markdown(f"<div style='text-align:right; font-weight:700; font-size:1.4rem; color:#172554;'>{format_inr(prop.total_amount)}</div>", unsafe_allow_html=True)
-                    st.caption(f"Disbursement Account: `{prop.account_id}`")
+                    st.markdown(
+                        f"<div class='pw-column-eyebrow-right'>TOTAL OUTFLOW</div>"
+                        f"<div style='text-align:right; font-weight:700; font-size:1.35rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{format_inr(prop.total_amount)}</div>"
+                        f"<div style='text-align:right; font-size:0.825rem; color:#526581; line-height:1.4;'>Disbursement Account: <code style='font-size:0.8rem;'>{prop.account_id}</code></div>",
+                        unsafe_allow_html=True,
+                    )
 
                 # Show preview findings triggering approval
                 if preview and preview.findings:

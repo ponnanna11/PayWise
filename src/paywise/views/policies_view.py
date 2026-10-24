@@ -46,16 +46,25 @@ def render_policies_view(db_path: str):
             with st.container(border=True):
                 p1, p2, p3 = st.columns([2.5, 1, 1.2])
                 with p1:
-                    st.markdown(f"**{pol.name}** (`{pol.id}`)")
+                    st.markdown(
+                        f"<div class='pw-column-eyebrow'>SAFETY INVARIANT</div>"
+                        f"<div style='font-weight:700; font-size:1.1rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{pol.name} <code style='font-size:0.8rem; font-weight:normal;'>{pol.id}</code></div>",
+                        unsafe_allow_html=True,
+                    )
                     st.write(pol.description)
                     st.caption(f"Rule Type: `{pol.rule_type.value}` • Version: **v{pol.version}**")
                     if pol.parameters:
                         with st.expander("Parameters & Thresholds", expanded=False):
                             st.json(pol.parameters)
                 with p2:
-                    st.markdown(f"<span class='pw-badge pw-badge-block'>🛑 {pol.severity.value}</span>", unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:0.825rem; color:#B91C1C; font-weight:600; margin-top:0.35rem;'>🔒 Invariant Safety Guard</p>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div class='pw-column-eyebrow'>POLICY SEVERITY</div>"
+                        f"<div style='margin:0.25rem 0 0.35rem 0;'><span class='pw-badge pw-badge-block'>🛑 {pol.severity.value}</span></div>"
+                        f"<div style='font-size:0.825rem; color:#B91C1C; font-weight:600;'>🔒 Mandatory Invariant</div>",
+                        unsafe_allow_html=True,
+                    )
                 with p3:
+                    st.markdown("<div class='pw-column-eyebrow-right'>STATUS</div>", unsafe_allow_html=True)
                     st.button("Active (Locked)", key=f"lock_{pol.id}", disabled=True, use_container_width=True)
 
         st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
@@ -68,16 +77,25 @@ def render_policies_view(db_path: str):
             with st.container(border=True):
                 p1, p2, p3 = st.columns([2.5, 1, 1.2])
                 with p1:
-                    st.markdown(f"**{pol.name}** (`{pol.id}`)")
+                    st.markdown(
+                        f"<div class='pw-column-eyebrow'>BUSINESS RULE</div>"
+                        f"<div style='font-weight:700; font-size:1.1rem; color:#172554; line-height:1.3; margin:0.25rem 0 0.35rem 0;'>{pol.name} <code style='font-size:0.8rem; font-weight:normal;'>{pol.id}</code></div>",
+                        unsafe_allow_html=True,
+                    )
                     st.write(pol.description)
                     st.caption(f"Rule Type: `{pol.rule_type.value}` • Version: **v{pol.version}**")
                     if pol.parameters:
                         with st.expander("Parameters & Thresholds", expanded=False):
                             st.json(pol.parameters)
                 with p2:
-                    st.markdown(f"<span class='pw-badge {badge_cls}'>{icon} {sev_val}</span>", unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:0.825rem; color:#15803D; font-weight:600; margin-top:0.35rem;'>⚙️ Configurable Rule</p>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div class='pw-column-eyebrow'>POLICY SEVERITY</div>"
+                        f"<div style='margin:0.25rem 0 0.35rem 0;'><span class='pw-badge {badge_cls}'>{icon} {sev_val}</span></div>"
+                        f"<div style='font-size:0.825rem; color:#15803D; font-weight:600;'>⚙️ Configurable Rule</div>",
+                        unsafe_allow_html=True,
+                    )
                 with p3:
+                    st.markdown("<div class='pw-column-eyebrow-right'>ACTION</div>", unsafe_allow_html=True)
                     is_active = pol.is_active
                     btn_label = "Deactivate" if is_active else "Activate"
                     btn_type = "secondary" if is_active else "primary"

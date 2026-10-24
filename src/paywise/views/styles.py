@@ -2,7 +2,7 @@
 Modern, accessible light fintech SaaS design system stylesheet for PayWise.
 Implements a refined light-blue fintech palette, clear typography hierarchy (Inter),
 subtle card borders, accessible contrast, semantic status indicators,
-and eliminates dark bands and code-block rendering anomalies.
+and precise vertical and horizontal text alignment.
 """
 import streamlit as st
 
@@ -47,13 +47,15 @@ def apply_custom_styles():
             max-width: 1400px !important;
         }
 
-        /* Headings Hierarchy */
+        /* Standardized Heading Styles with Clean Margins */
         h1, .pw-page-title {
             font-size: 1.85rem !important;
             font-weight: 700 !important;
             color: #172554 !important;
             letter-spacing: -0.025em !important;
-            margin-bottom: 0.35rem !important;
+            margin: 0 0 0.35rem 0 !important;
+            padding: 0 !important;
+            line-height: 1.25 !important;
         }
 
         h2, h3, .stSubheader {
@@ -63,18 +65,69 @@ def apply_custom_styles():
             letter-spacing: -0.015em !important;
             margin-top: 1.25rem !important;
             margin-bottom: 0.75rem !important;
+            line-height: 1.3 !important;
         }
 
         h4 {
             font-size: 1.1rem !important;
             font-weight: 600 !important;
             color: #172554 !important;
+            margin-top: 0.75rem !important;
+            margin-bottom: 0.35rem !important;
+            line-height: 1.3 !important;
         }
 
         p, .stMarkdown p {
             font-size: 0.95rem !important;
             line-height: 1.55 !important;
             color: #374151 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0.4rem !important;
+        }
+
+        /* Universal Baseline Alignment for Columns and Cards */
+        div[data-testid="column"] .stMarkdown:first-child,
+        div[data-testid="column"] .stMarkdown:first-child > div,
+        div[data-testid="column"] .stMarkdown:first-child > div > h1,
+        div[data-testid="column"] .stMarkdown:first-child > div > h2,
+        div[data-testid="column"] .stMarkdown:first-child > div > h3,
+        div[data-testid="column"] .stMarkdown:first-child > div > h4,
+        div[data-testid="column"] .stMarkdown:first-child > div > p,
+        div[data-testid="column"] .stCaption:first-child,
+        div[data-testid="column"] .stCaption:first-child > div,
+        div[data-testid="column"] .stCaption:first-child p,
+        div[data-testid="column"] div:first-child > .pw-column-eyebrow,
+        div[data-testid="stVerticalBlockBorderWrapper"] .stMarkdown:first-child > div > h1,
+        div[data-testid="stVerticalBlockBorderWrapper"] .stMarkdown:first-child > div > h2,
+        div[data-testid="stVerticalBlockBorderWrapper"] .stMarkdown:first-child > div > h3,
+        div[data-testid="stVerticalBlockBorderWrapper"] .stMarkdown:first-child > div > p {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Column Eyebrow Labels for Perfect Horizontal Rhythms */
+        .pw-column-eyebrow {
+            font-size: 0.775rem !important;
+            font-weight: 600 !important;
+            color: #526581 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            margin: 0 0 0.35rem 0 !important;
+            padding: 0 !important;
+            line-height: 1.2 !important;
+            text-align: left !important;
+        }
+
+        .pw-column-eyebrow-right {
+            font-size: 0.775rem !important;
+            font-weight: 600 !important;
+            color: #526581 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            margin: 0 0 0.35rem 0 !important;
+            padding: 0 !important;
+            line-height: 1.2 !important;
+            text-align: right !important;
         }
 
         /* Page Header Banner Component */
@@ -85,32 +138,45 @@ def apply_custom_styles():
             padding: 1.35rem 1.75rem;
             margin-bottom: 1.5rem;
             box-shadow: 0 1px 3px 0 rgba(37, 99, 235, 0.04);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .pw-page-title {
             font-size: 1.85rem !important;
-            font-weight: 700;
-            color: #172554;
-            margin: 0;
-            line-height: 1.25;
+            font-weight: 700 !important;
+            color: #172554 !important;
+            margin: 0 0 0.35rem 0 !important;
+            padding: 0 !important;
+            line-height: 1.25 !important;
+            text-align: left !important;
         }
 
         .pw-page-subtitle {
-            font-size: 0.95rem;
-            color: #526581;
-            margin-top: 0.35rem;
-            line-height: 1.5;
+            font-size: 0.95rem !important;
+            color: #526581 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1.5 !important;
+            text-align: left !important;
         }
 
-        /* Metric Cards */
+        /* Metric Cards - Aligned Horizontally Across Rows */
         .pw-metric-card {
             background: #FFFFFF;
             border: 1px solid #DCE6F5;
             border-radius: 10px;
-            padding: 1.25rem 1.35rem;
+            padding: 1.15rem 1.25rem;
             box-shadow: 0 1px 2px 0 rgba(37, 99, 235, 0.03);
             transition: border-color 0.15s ease, box-shadow 0.15s ease;
             height: 100%;
+            min-height: 112px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            text-align: left;
         }
 
         .pw-metric-card:hover {
@@ -119,27 +185,33 @@ def apply_custom_styles():
         }
 
         .pw-metric-label {
-            font-size: 0.825rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: #526581;
             text-transform: uppercase;
             letter-spacing: 0.04em;
+            margin: 0;
+            line-height: 1.2;
+            text-align: left;
         }
 
         .pw-metric-value {
             font-size: 1.85rem;
             font-weight: 700;
             color: #172554;
-            margin-top: 0.4rem;
+            margin: 0.35rem 0 0 0;
             letter-spacing: -0.02em;
             line-height: 1.2;
+            text-align: left;
         }
 
         .pw-metric-subtext {
-            font-size: 0.85rem;
+            font-size: 0.825rem;
             color: #64748B;
-            margin-top: 0.35rem;
+            margin: 0.35rem 0 0 0;
             font-weight: 400;
+            line-height: 1.3;
+            text-align: left;
         }
 
         /* Status & Severity Badges */
@@ -153,6 +225,7 @@ def apply_custom_styles():
             border-radius: 9999px;
             letter-spacing: 0.02em;
             white-space: nowrap;
+            line-height: 1.3;
         }
 
         .pw-badge-block {
@@ -194,6 +267,7 @@ def apply_custom_styles():
             border: 1px solid #DCE6F5;
             border-left-width: 5px;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+            text-align: left;
         }
 
         .pw-finding-block {
@@ -212,28 +286,32 @@ def apply_custom_styles():
         }
 
         .pw-finding-title {
-            font-weight: 600;
-            font-size: 1.05rem;
-            color: #172554;
-            margin-top: 0.45rem;
-            margin-bottom: 0.25rem;
+            font-weight: 600 !important;
+            font-size: 1.05rem !important;
+            color: #172554 !important;
+            margin: 0.5rem 0 0.25rem 0 !important;
+            line-height: 1.35 !important;
+            text-align: left !important;
         }
 
         .pw-finding-desc {
-            font-size: 0.925rem;
-            color: #374151;
-            line-height: 1.5;
-            margin-top: 0.25rem;
+            font-size: 0.925rem !important;
+            color: #374151 !important;
+            line-height: 1.5 !important;
+            margin: 0.25rem 0 0 0 !important;
+            text-align: left !important;
         }
 
         .pw-finding-remedy {
-            margin-top: 0.6rem;
-            padding: 0.5rem 0.75rem;
-            background: #EFF6FF;
-            border: 1px solid #DBEAFE;
-            border-radius: 6px;
-            font-size: 0.875rem;
-            color: #1E40AF;
+            margin-top: 0.6rem !important;
+            padding: 0.5rem 0.75rem !important;
+            background: #EFF6FF !important;
+            border: 1px solid #DBEAFE !important;
+            border-radius: 6px !important;
+            font-size: 0.875rem !important;
+            color: #1E40AF !important;
+            line-height: 1.4 !important;
+            text-align: left !important;
         }
 
         /* Empty State */
@@ -306,16 +384,32 @@ def apply_custom_styles():
             padding-right: 1.25rem !important;
         }
 
-        /* Sidebar Nav Button Styles */
-        .stSidebar .stButton > button {
+        /* Sidebar Nav Button Styles: Explicit Left Text Alignment */
+        .stSidebar .stButton > button,
+        .stSidebar div[data-testid="stButton"] button {
             text-align: left !important;
             justify-content: flex-start !important;
+            align-items: center !important;
+            display: flex !important;
             font-size: 0.925rem !important;
             font-weight: 500 !important;
-            padding: 0.55rem 0.85rem !important;
+            padding: 0.6rem 0.9rem !important;
             border-radius: 8px !important;
             margin-bottom: 0.25rem !important;
             width: 100% !important;
+        }
+
+        .stSidebar .stButton > button *,
+        .stSidebar div[data-testid="stButton"] button *,
+        .stSidebar .stButton > button div[data-testid="stMarkdownContainer"],
+        .stSidebar .stButton > button div[data-testid="stMarkdownContainer"] > p,
+        .stSidebar .stButton > button span {
+            text-align: left !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+            display: flex !important;
+            width: 100% !important;
+            margin: 0 !important;
         }
 
         /* Form Inputs */
@@ -333,11 +427,14 @@ def apply_custom_styles():
         }
 
         /* Form Labels */
-        .stTextInput label, .stNumberInput label, .stSelectbox label, .stTextArea label, .stDateInput label {
+        .stTextInput label, .stNumberInput label, .stSelectbox label, .stTextArea label, .stDateInput label,
+        label[data-testid="stWidgetLabel"], label[data-testid="stWidgetLabel"] p {
             font-size: 0.925rem !important;
             font-weight: 600 !important;
             color: #172554 !important;
             margin-bottom: 0.35rem !important;
+            text-align: left !important;
+            justify-content: flex-start !important;
         }
 
         /* Card Container (Native st.container with border) */
