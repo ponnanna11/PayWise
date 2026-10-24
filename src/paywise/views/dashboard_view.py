@@ -157,9 +157,9 @@ def render_dashboard(db_path: str):
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "Timestamp": st.column_config.TextColumn("Timestamp", width="medium"),
-                    "Event": st.column_config.TextColumn("Event", width="large"),
-                    "Proposal": st.column_config.TextColumn("Proposal", width="medium"),
+                    "Timestamp": st.column_config.TextColumn("Timestamp", width="small"),
+                    "Event": st.column_config.TextColumn("Event", width="medium"),
+                    "Proposal": st.column_config.TextColumn("Proposal", width="small"),
                     "Actor": st.column_config.TextColumn("Actor", width="small"),
                     "Outcome": st.column_config.TextColumn("Outcome", width="small"),
                 },

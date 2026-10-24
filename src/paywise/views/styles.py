@@ -117,6 +117,10 @@ def apply_custom_styles():
         }
 
         /* Universal Baseline Alignment for Columns and Cards */
+        div[data-testid="column"] {
+            min-width: 0 !important;
+        }
+
         div[data-testid="column"] .stMarkdown:first-child,
         div[data-testid="column"] .stMarkdown:first-child > div,
         div[data-testid="column"] .stMarkdown:first-child > div > h1,
@@ -299,6 +303,10 @@ def apply_custom_styles():
             border-left-width: 5px;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
             text-align: left;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            box-sizing: border-box !important;
+            max-width: 100% !important;
         }
 
         .pw-finding-block {

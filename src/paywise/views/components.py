@@ -15,12 +15,7 @@ def render_page_header(title: str, subtitle: str = ""):
     escaped_title = html.escape(title)
     escaped_sub = html.escape(subtitle) if subtitle else ""
     sub_html = f'<div class="pw-page-subtitle">{escaped_sub}</div>' if escaped_sub else ""
-    markup = textwrap.dedent(f"""
-        <div class="pw-page-header">
-            <h1 class="pw-page-title">{escaped_title}</h1>
-            {sub_html}
-        </div>
-    """).strip()
+    markup = f'<div class="pw-page-header"><h1 class="pw-page-title">{escaped_title}</h1>{sub_html}</div>'
     st.markdown(markup, unsafe_allow_html=True)
 
 
@@ -36,13 +31,13 @@ def render_metric_card(label: str, value: str, subtext: str = "", value_color: O
     """Renders a minimalist SaaS metric card."""
     color_style = f"style='color: {value_color};'" if value_color else ""
     sub_html = f'<div class="pw-metric-subtext">{html.escape(subtext)}</div>' if subtext else ""
-    markup = textwrap.dedent(f"""
-        <div class="pw-metric-card">
-            <div class="pw-metric-label">{html.escape(label)}</div>
-            <div class="pw-metric-value" {color_style}>{html.escape(value)}</div>
-            {sub_html}
-        </div>
-    """).strip()
+    markup = (
+        f'<div class="pw-metric-card">'
+        f'<div class="pw-metric-label">{html.escape(label)}</div>'
+        f'<div class="pw-metric-value" {color_style}>{html.escape(value)}</div>'
+        f'{sub_html}'
+        f'</div>'
+    )
     st.markdown(markup, unsafe_allow_html=True)
 
 
@@ -77,7 +72,7 @@ def render_severity_callout(
 ):
     """
     Renders structured policy engine finding callout as a clean light card.
-    Uses dedented, unindented HTML so markdown parsers never mistake it for a code block.
+    Uses continuous contiguous HTML so markdown parsers never mistake it for a code block.
     """
     sev = str(severity).upper()
     card_cls = "pw-finding-block" if sev == "BLOCK" else "pw-finding-approval" if sev == "REQUIRE_APPROVAL" else "pw-finding-warn"
@@ -91,18 +86,17 @@ def render_severity_callout(
         else ""
     )
 
-    markup = textwrap.dedent(f"""
-        <div class="pw-finding-card {card_cls}">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span class="pw-badge {badge_cls}">{icon} {sev}</span>
-                {pid_html}
-            </div>
-            <div class="pw-finding-title">{html.escape(rule_name)}</div>
-            <div class="pw-finding-desc">{html.escape(explanation)}</div>
-            {remedy_html}
-        </div>
-    """).strip()
-
+    markup = (
+        f'<div class="pw-finding-card {card_cls}">'
+        f'<div style="display:flex; justify-content:space-between; align-items:center;">'
+        f'<span class="pw-badge {badge_cls}">{icon} {sev}</span>'
+        f'{pid_html}'
+        f'</div>'
+        f'<div class="pw-finding-title">{html.escape(rule_name)}</div>'
+        f'<div class="pw-finding-desc">{html.escape(explanation)}</div>'
+        f'{remedy_html}'
+        f'</div>'
+    )
     st.markdown(markup, unsafe_allow_html=True)
 
 
@@ -154,13 +148,13 @@ def render_before_after_comparison(
 
 def render_empty_state(title: str, message: str, icon: str = "📁"):
     """Renders an empty state placeholder."""
-    markup = textwrap.dedent(f"""
-        <div class="pw-empty-state">
-            <div style="font-size: 2.25rem; margin-bottom: 0.5rem;">{icon}</div>
-            <div style="font-weight: 600; font-size: 1.1rem; color: #172554;">{html.escape(title)}</div>
-            <div style="font-size: 0.925rem; color: #526581; margin-top: 0.35rem; max-width: 450px; margin-left: auto; margin-right: auto; line-height: 1.5;">{html.escape(message)}</div>
-        </div>
-    """).strip()
+    markup = (
+        f'<div class="pw-empty-state">'
+        f'<div style="font-size: 2.25rem; margin-bottom: 0.5rem;">{icon}</div>'
+        f'<div style="font-weight: 600; font-size: 1.1rem; color: #172554;">{html.escape(title)}</div>'
+        f'<div style="font-size: 0.925rem; color: #526581; margin-top: 0.35rem; max-width: 450px; margin-left: auto; margin-right: auto; line-height: 1.5;">{html.escape(message)}</div>'
+        f'</div>'
+    )
     st.markdown(markup, unsafe_allow_html=True)
 
 
@@ -184,16 +178,15 @@ def render_ai_status_card(health: Dict[str, Any]):
         badge_cls = "pw-badge-approval"
         icon = "⚠️"
 
-    markup = textwrap.dedent(f"""
-        <div style="background:#FFFFFF; border:1px solid #DCE6F5; border-left:4px solid {border_color}; border-radius:10px; padding:1rem 1.35rem; margin-bottom:1rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-weight:600; font-size:1rem; color:#172554;">{icon} AI Agent Runtime: {html.escape(provider)}</div>
-                <span class="pw-badge {badge_cls}">{html.escape(status)}</span>
-            </div>
-            <div style="font-size:0.875rem; color:#526581; margin-top:0.4rem; line-height:1.45;">
-                <b>Model</b>: <code>{html.escape(model)}</code> • {html.escape(message)}
-            </div>
-        </div>
-    """).strip()
-
+    markup = (
+        f'<div style="background:#FFFFFF; border:1px solid #DCE6F5; border-left:4px solid {border_color}; border-radius:10px; padding:1rem 1.35rem; margin-bottom:1rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);">'
+        f'<div style="display:flex; justify-content:space-between; align-items:center;">'
+        f'<div style="font-weight:600; font-size:1rem; color:#172554;">{icon} AI Agent Runtime: {html.escape(provider)}</div>'
+        f'<span class="pw-badge {badge_cls}">{html.escape(status)}</span>'
+        f'</div>'
+        f'<div style="font-size:0.875rem; color:#526581; margin-top:0.4rem; line-height:1.45;">'
+        f'<b>Model</b>: <code>{html.escape(model)}</code> • {html.escape(message)}'
+        f'</div>'
+        f'</div>'
+    )
     st.markdown(markup, unsafe_allow_html=True)
