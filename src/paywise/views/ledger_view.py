@@ -2,6 +2,7 @@
 Simulated Ledger View for PayWise.
 Displays simulated bank accounts, supplier directory, and accounts payable invoices.
 """
+import textwrap
 import streamlit as st
 import pandas as pd
 from paywise.repositories.account_repo import AccountRepository
@@ -15,18 +16,18 @@ from paywise.views.components import render_page_header, render_empty_state
 def render_ledger_view(db_path: str):
     render_page_header(
         "Simulated Ledger",
-        "Simulated corporate bank accounts, verified suppliers directory, and accounts payable invoices.",
+        "Inspection view of simulated corporate bank accounts, verified suppliers directory, and accounts payable invoices.",
     )
 
     acc_repo = AccountRepository(db_path)
     sup_repo = SupplierRepository(db_path)
     inv_repo = InvoiceRepository(db_path)
 
-    tab_acc, tab_sup, tab_inv, tab_reset = st.tabs([
+    # Clean Financial Navigation Tabs (Reset moved out of normal financial workflow)
+    tab_acc, tab_sup, tab_inv = st.tabs([
         "🏦 Treasury Accounts",
         "🏢 Verified Suppliers",
         "📄 Accounts Payable Invoices",
-        "🔄 Database Initialization",
     ])
 
     with tab_acc:
@@ -130,10 +131,20 @@ def render_ledger_view(db_path: str):
             },
         )
 
-    with tab_reset:
-        st.subheader("Re-seed Synthetic Demo Ledger")
-        st.warning("⚠️ Re-initializing the database restores all baseline accounts, suppliers, invoices, and standard policies to their initial demo state.")
-        if st.button("🔄 Reset to Default Seed Data", type="primary"):
+    # Restricted Developer & Admin Area (Separated from standard financial workflow)
+    st.markdown("<div style='margin-top: 2.5rem;'></div>", unsafe_allow_html=True)
+    with st.expander("🔧 Restricted Database Administration & Demo Re-seed", expanded=False):
+        st.markdown("#### Database Reset Controls")
+        st.write(
+            "Re-seeding resets the virtual SQLite ledger to its clean baseline state with sample corporate accounts, "
+            "verified suppliers, and baseline invoices. This action discards active simulated proposals and custom rules."
+        )
+        
+        confirm_reset = st.checkbox(
+            "I understand this action will restore baseline records and discard uncommitted simulated state.",
+            key="chk_confirm_reset",
+        )
+        if st.button("🔄 Confirm & Restore Default Seed Data", type="primary", disabled=not confirm_reset, key="btn_confirm_reset"):
             seed_database(db_path)
-            st.success("Database successfully re-initialized with clean seed records.")
+            st.success("Database restored to default clean baseline.")
             st.rerun()

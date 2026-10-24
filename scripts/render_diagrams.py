@@ -59,7 +59,7 @@ def render_all():
         svg_path = puml.with_suffix(".svg")
         content = puml.read_text(encoding="utf-8")
         encoded = encode_plantuml(content)
-        url = f"https://www.plantuml.com/plantuml/svg/~1{encoded}"
+        url = f"https://www.plantuml.com/plantuml/svg/{encoded}"
         try:
             resp = requests.get(url, timeout=15)
             if resp.status_code == 200 and "<svg" in resp.text:

@@ -19,10 +19,7 @@ from paywise.repositories.supplier_repo import SupplierRepository
 from paywise.services.ai_adapter import AIAdapter
 from paywise.services.proposal_service import ProposalService
 from paywise.utils.formatters import format_inr
-from paywise.views.components import (
-    render_page_header,
-    render_ai_status_card,
-)
+from paywise.views.components import render_page_header
 
 
 def render_new_proposal_view(db_path: str):
@@ -36,10 +33,6 @@ def render_new_proposal_view(db_path: str):
     inv_repo = InvoiceRepository(db_path)
     prop_service = ProposalService(db_path)
     ai_adapter = AIAdapter()
-
-    # AI Runtime Health Indicator
-    health = ai_adapter.check_health()
-    render_ai_status_card(health)
 
     accounts = acc_repo.list_all()
     suppliers = sup_repo.list_all()

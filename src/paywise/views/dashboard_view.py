@@ -12,7 +12,6 @@ from paywise.utils.formatters import format_inr, format_date
 from paywise.views.components import (
     render_page_header,
     render_metric_card,
-    render_ai_status_card,
     render_severity_callout,
     render_empty_state,
 )
@@ -29,10 +28,6 @@ def render_dashboard(db_path: str):
     prop_repo = ProposalRepository(db_path)
     audit_repo = AuditRepository(db_path)
     ai_adapter = AIAdapter()
-
-    # AI Runtime Health Indicator
-    ai_health = ai_adapter.check_health()
-    render_ai_status_card(ai_health)
 
     accounts = acc_repo.list_all()
     proposals = prop_repo.list_all()
