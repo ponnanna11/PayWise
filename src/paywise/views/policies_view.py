@@ -1,7 +1,8 @@
 """
-Policy Management View for PayWise.
+Safety Policies View for PayWise.
 Enables viewing safety rules, configuring thresholds, activating policies, and drafting new policies via AI.
 """
+import textwrap
 import streamlit as st
 import pandas as pd
 from paywise.models.policy import Policy, PolicyRuleType, PolicySeverity
@@ -17,7 +18,7 @@ from paywise.views.components import (
 
 def render_policies_view(db_path: str):
     render_page_header(
-        "Policy Management Studio",
+        "Safety Policies & Governance Rules",
         "Deterministic safety rules, configurable financial thresholds, and AI-assisted policy drafting.",
     )
 
@@ -27,7 +28,7 @@ def render_policies_view(db_path: str):
 
     tab_active, tab_ai, tab_manual = st.tabs([
         "📋 Active & Mandatory Policies",
-        "🤖 AI Policy Drafting Assistant",
+        "✨ AI Policy Drafting Assistant",
         "➕ Add Custom Financial Rule",
     ])
 
@@ -49,10 +50,11 @@ def render_policies_view(db_path: str):
                     st.write(pol.description)
                     st.caption(f"Rule Type: `{pol.rule_type.value}` • Version: **v{pol.version}**")
                     if pol.parameters:
-                        st.json(pol.parameters, expanded=False)
+                        with st.expander("Parameters & Thresholds", expanded=False):
+                            st.json(pol.parameters)
                 with p2:
                     st.markdown(f"<span class='pw-badge pw-badge-block'>🛑 {pol.severity.value}</span>", unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:0.775rem; color:#DC2626; font-weight:600; margin-top:0.35rem;'>🔒 Invariant Safety Guard</p>", unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:0.825rem; color:#B91C1C; font-weight:600; margin-top:0.35rem;'>🔒 Invariant Safety Guard</p>", unsafe_allow_html=True)
                 with p3:
                     st.button("Active (Locked)", key=f"lock_{pol.id}", disabled=True, use_container_width=True)
 
@@ -70,10 +72,11 @@ def render_policies_view(db_path: str):
                     st.write(pol.description)
                     st.caption(f"Rule Type: `{pol.rule_type.value}` • Version: **v{pol.version}**")
                     if pol.parameters:
-                        st.json(pol.parameters, expanded=False)
+                        with st.expander("Parameters & Thresholds", expanded=False):
+                            st.json(pol.parameters)
                 with p2:
                     st.markdown(f"<span class='pw-badge {badge_cls}'>{icon} {sev_val}</span>", unsafe_allow_html=True)
-                    st.markdown("<p style='font-size:0.775rem; color:#0D9488; font-weight:600; margin-top:0.35rem;'>⚙️ Configurable Rule</p>", unsafe_allow_html=True)
+                    st.markdown("<p style='font-size:0.825rem; color:#15803D; font-weight:600; margin-top:0.35rem;'>⚙️ Configurable Rule</p>", unsafe_allow_html=True)
                 with p3:
                     is_active = pol.is_active
                     btn_label = "Deactivate" if is_active else "Activate"
@@ -87,17 +90,23 @@ def render_policies_view(db_path: str):
 
     # TAB 2: AI POLICY DRAFTING ASSISTANT
     with tab_ai:
-        st.subheader("🤖 AI Policy Drafting Assistant (Untrusted Draft)")
-        st.markdown(
-            """
-            Enter an operational policy rule in plain English (e.g. *'Payments exceeding ₹75,000 require manager approval'*).
-            The AI assistant translates it into a structured, validated candidate policy schema.
-            <div style="background:#FEF2F2; border-left:4px solid #DC2626; padding:0.75rem 1rem; border-radius:6px; margin:0.75rem 0; font-size:0.875rem; color:#991B1B;">
-                <b>Safety Boundary</b>: The AI cannot activate policies directly. A human administrator must verify the candidate schema and explicitly authorize activation.
+        st.subheader("AI Policy Drafting Assistant (Untrusted Draft)")
+        
+        box_markup = textwrap.dedent("""
+            <div style="background:#FFFFFF; border:1px solid #DCE6F5; border-left:4px solid #2563EB; padding:1.1rem 1.35rem; border-radius:10px; margin-bottom:1.25rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);">
+                <div style="font-size:0.925rem; color:#172554; font-weight:600; margin-bottom:0.25rem;">
+                    Natural Language Governance Translator:
+                </div>
+                <div style="font-size:0.9rem; color:#374151; line-height:1.5;">
+                    Enter an operational policy rule in plain English (e.g. <i>'Payments exceeding ₹75,000 require manager approval'</i>).
+                    The AI assistant translates it into a structured, validated candidate policy schema.
+                </div>
+                <div style="font-size:0.85rem; color:#B45309; margin-top:0.5rem; font-weight:500;">
+                    ⚠️ <b>Safety Boundary</b>: The AI cannot activate policies directly. A human administrator must verify the candidate schema and explicitly authorize activation.
+                </div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        """).strip()
+        st.markdown(box_markup, unsafe_allow_html=True)
 
         ai_input = st.text_input(
             "Natural Language Business Policy",

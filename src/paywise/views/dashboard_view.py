@@ -11,7 +11,6 @@ from paywise.services.ai_adapter import AIAdapter
 from paywise.utils.formatters import format_inr, format_date
 from paywise.views.components import (
     render_page_header,
-    render_simulation_banner,
     render_metric_card,
     render_ai_status_card,
     render_severity_callout,
@@ -20,11 +19,11 @@ from paywise.views.components import (
 
 
 def render_dashboard(db_path: str):
+    # Top Section: Title & Short Subtitle (No repeated simulation disclaimer banner!)
     render_page_header(
-        "Financial Operations Dashboard",
-        "Real-time governance gateway monitoring simulated treasury liquidity, proposed batches, and safety barriers.",
+        "Financial Safety Dashboard",
+        "Real-time pre-execution consequence simulation, liquidity reserve management & governance telemetry",
     )
-    render_simulation_banner()
 
     acc_repo = AccountRepository(db_path)
     prop_repo = ProposalRepository(db_path)
@@ -48,37 +47,37 @@ def render_dashboard(db_path: str):
     blocked_proposals = [p for p in proposals if p.status.value == "BLOCKED"]
     total_pending_outflow = sum(p.total_amount for p in pending_proposals)
 
-    # Top KPI Metrics Row
+    # 1. Six Financial Metrics in a Balanced Grid
     k1, k2, k3, k4, k5, k6 = st.columns(6)
     with k1:
-        render_metric_card("Simulated Cash", format_inr(total_cash), f"{len(accounts)} Accounts")
+        render_metric_card("Simulated Cash", format_inr(total_cash), f"{len(accounts)} Accounts", value_color="#172554")
     with k2:
-        render_metric_card("Reserved Funds", format_inr(total_reserved), "Mandatory Floor", value_color="#475569")
+        render_metric_card("Reserved Funds", format_inr(total_reserved), "Mandatory Liquidity Floor", value_color="#526581")
     with k3:
-        render_metric_card("Available Funds", format_inr(total_available), "Liquid & Safe", value_color="#0D9488")
+        render_metric_card("Available Funds", format_inr(total_available), "Liquid & Unencumbered", value_color="#15803D")
     with k4:
-        render_metric_card("Pending Outflow", format_inr(total_pending_outflow), f"{len(pending_proposals)} Batches", value_color="#2563EB")
+        render_metric_card("Pending Outflow", format_inr(total_pending_outflow), f"{len(pending_proposals)} Batch(es)", value_color="#2563EB")
     with k5:
-        render_metric_card("Awaiting Sign-off", str(len(awaiting_approval)), "Needs Manager Approval", value_color="#D97706")
+        render_metric_card("Awaiting Sign-off", str(len(awaiting_approval)), "Requires Manager Authorization", value_color="#D97706")
     with k6:
-        render_metric_card("Blocked Proposals", str(len(blocked_proposals)), "Safety Policy Barrier", value_color="#DC2626")
+        render_metric_card("Blocked Proposals", str(len(blocked_proposals)), "Policy Violations Intercepted", value_color="#DC2626")
 
-    st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
 
-    # Middle Row: Treasury Accounts & Active Proposals
-    col_left, col_right = st.columns([1.1, 1.4])
+    # 2. Middle Row: Treasury Accounts & Active Proposals
+    col_left, col_right = st.columns([1.15, 1.35])
 
     with col_left:
         st.subheader("🏦 Treasury Accounts Overview")
         for acc in accounts:
             with st.container(border=True):
-                c1, c2 = st.columns([1.5, 1])
+                c1, c2 = st.columns([1.4, 1])
                 with c1:
                     st.markdown(f"**{acc.account_name}**")
-                    st.caption(f"{acc.bank_name} • `{acc.account_number}`")
+                    st.caption(f"{acc.bank_name} • Account ending in `...{acc.account_number[-4:]}`")
                 with c2:
-                    st.markdown(f"<h4 style='margin:0; text-align:right;'>{format_inr(acc.current_balance)}</h4>", unsafe_allow_html=True)
-                    st.markdown(f"<p style='margin:0; font-size:0.75rem; color:#0D9488; text-align:right;'>Available: {format_inr(acc.available_funds)}</p>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:right; font-weight:700; font-size:1.15rem; color:#172554;'>{format_inr(acc.current_balance)}</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:right; font-size:0.825rem; color:#15803D; font-weight:500;'>Available: {format_inr(acc.available_funds)}</div>", unsafe_allow_html=True)
 
                 ratio = min(1.0, max(0.0, acc.reserved_balance / acc.current_balance)) if acc.current_balance > 0 else 0
                 st.progress(ratio, text=f"Mandatory Reserve: {format_inr(acc.reserved_balance)} ({ratio*100:.1f}%)")
@@ -86,33 +85,46 @@ def render_dashboard(db_path: str):
     with col_right:
         st.subheader("📋 Active Financial Proposals")
         if not proposals:
-            render_empty_state("No Proposals Found", "Create a new financial proposal to begin simulation.", icon="📝")
+            render_empty_state("No Proposals Found", "Create a new financial proposal to begin pre-execution simulation.", icon="📝")
         else:
             table_data = []
             for p in proposals[:6]:
                 table_data.append({
-                    "Proposal ID": p.id,
+                    "Proposal": p.id,
                     "Title": p.title,
-                    "Source": p.source,
                     "Amount": format_inr(p.total_amount),
                     "Status": p.status.value,
+                    "Source": p.source,
                     "Created": format_date(p.created_at),
                 })
-            st.dataframe(pd.DataFrame(table_data), use_container_width=True, hide_index=True)
+            df_proposals = pd.DataFrame(table_data)
+            st.dataframe(
+                df_proposals,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Proposal": st.column_config.TextColumn("Proposal ID", width="small"),
+                    "Title": st.column_config.TextColumn("Title", width="medium"),
+                    "Amount": st.column_config.TextColumn("Amount", width="small"),
+                    "Status": st.column_config.TextColumn("Status", width="small"),
+                    "Source": st.column_config.TextColumn("Source", width="small"),
+                    "Created": st.column_config.TextColumn("Date", width="small"),
+                },
+            )
 
-    # Bottom Row: Safety Interceptions & Audit Trail
-    st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)
+    # 3. Bottom Row: Safety Interceptions & Audit Trail
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
     b_left, b_right = st.columns(2)
 
     with b_left:
         st.subheader("⚠️ Recent Safety Findings & Policy Interceptions")
         violation_events = [e for e in audit_events if e.event_type.value in ["POLICY_VIOLATION_DETECTED", "REVALIDATION_FAILED"]]
         if not violation_events:
-            st.success("✅ **Zero Recent Safety Violations**: All recent financial operations conformed to active safety rules.")
+            st.success("✅ **Zero Recent Safety Violations**: All recent financial operations strictly conformed to safety policies.")
         else:
             for ev in violation_events[:3]:
-                rule = ev.details.get("rule_name") or ev.details.get("revalidation_failure") or "Policy Rule"
-                expl = ev.details.get("explanation") or ev.details.get("revalidation_failure") or ""
+                rule = ev.details.get("rule_name") or ev.details.get("revalidation_failure") or "Financial Policy Barrier"
+                expl = ev.details.get("explanation") or ev.details.get("revalidation_failure") or "Policy conditions failed pre-execution check."
                 render_severity_callout(
                     severity=ev.outcome,
                     rule_name=rule,
@@ -123,7 +135,7 @@ def render_dashboard(db_path: str):
     with b_right:
         st.subheader("📜 Recent Governance Audit Events")
         if not audit_events:
-            render_empty_state("No Audit Events", "No historical audit records logged yet.", icon="📜")
+            render_empty_state("No Audit Events", "No historical audit events logged yet.", icon="📜")
         else:
             audit_rows = []
             for ev in audit_events[:6]:
@@ -134,4 +146,16 @@ def render_dashboard(db_path: str):
                     "Actor": ev.actor,
                     "Outcome": ev.outcome,
                 })
-            st.dataframe(pd.DataFrame(audit_rows), use_container_width=True, hide_index=True)
+            df_audit = pd.DataFrame(audit_rows)
+            st.dataframe(
+                df_audit,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Timestamp": st.column_config.TextColumn("Timestamp", width="small"),
+                    "Event": st.column_config.TextColumn("Event", width="medium"),
+                    "Proposal": st.column_config.TextColumn("Proposal", width="small"),
+                    "Actor": st.column_config.TextColumn("Actor", width="small"),
+                    "Outcome": st.column_config.TextColumn("Outcome", width="small"),
+                },
+            )

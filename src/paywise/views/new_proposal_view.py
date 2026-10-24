@@ -1,10 +1,11 @@
 """
-New Proposal View for PayWise.
-Features the autonomous AI agent operations flow (Gemini Flash), interactive safety presets,
+Create Proposal View for PayWise.
+Features AI-assisted proposal creation, interactive safety presets,
 and a deterministic manual transaction builder.
 """
 from datetime import date, timedelta
 import streamlit as st
+import textwrap
 from pydantic import ValidationError
 from paywise.models.proposal import (
     ProposalCreate,
@@ -21,16 +22,14 @@ from paywise.utils.formatters import format_inr
 from paywise.views.components import (
     render_page_header,
     render_ai_status_card,
-    render_simulation_banner,
 )
 
 
 def render_new_proposal_view(db_path: str):
     render_page_header(
-        "Proposal Studio & Agent Operations",
-        "Instruct the financial AI agent to draft payments, load pre-configured safety scenarios, or build transactions manually.",
+        "Create Proposal",
+        "Prepare financial disbursement proposals using AI assistance, interactive safety presets, or manual specification.",
     )
-    render_simulation_banner()
 
     acc_repo = AccountRepository(db_path)
     sup_repo = SupplierRepository(db_path)
@@ -38,7 +37,7 @@ def render_new_proposal_view(db_path: str):
     prop_service = ProposalService(db_path)
     ai_adapter = AIAdapter()
 
-    # AI Runtime Health Banner
+    # AI Runtime Health Indicator
     health = ai_adapter.check_health()
     render_ai_status_card(health)
 
@@ -53,25 +52,24 @@ def render_new_proposal_view(db_path: str):
         invoice_options[f"{inv.invoice_number} ({inv.id}) — {format_inr(inv.amount)} [{inv.status.value}]"] = inv.id
 
     tab_agent, tab_presets, tab_manual = st.tabs([
-        "🤖 AI Agent Operations (Gemini Flash)",
-        "⚡ Quick Safety Gate Presets",
-        "📝 Manual Transaction Builder",
+        "✨ AI-Assisted Proposal",
+        "⚡ Quick Safety Presets",
+        "📝 Manual Entry",
     ])
 
-    # TAB 1: PROMINENT AGENT OPERATIONS
+    # TAB 1: AI-ASSISTED PROPOSAL CREATION
     with tab_agent:
-        st.subheader("Autonomous Financial Operations Agent")
-        st.markdown(
-            """
-            <div style="background:#F8FAFC; border:1px solid #E2E8F0; padding:1rem; border-radius:8px; margin-bottom:1rem; color:#334155; font-size:0.9rem;">
-                <b>Architectural Separation of Concerns:</b><br>
-                1. <b>AI Agent Role</b>: Interprets business instructions, references approved suppliers and invoices, and drafts a structured candidate proposal.<br>
-                2. <b>PayWise Gateway Role</b>: Independently validates schema, calculates projected balances in an isolated sandbox, checks 15 deterministic policies, and enforces human sign-off.<br>
-                <i>The AI agent never commits disbursements directly or bypasses safety policies.</i>
+        st.subheader("AI-Assisted Proposal Drafting")
+        
+        info_markup = textwrap.dedent("""
+            <div style="background:#FFFFFF; border:1px solid #DCE6F5; border-left:4px solid #2563EB; padding:1.1rem 1.35rem; border-radius:10px; margin-bottom:1.25rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);">
+                <div style="font-weight:600; font-size:0.95rem; color:#172554; margin-bottom:0.25rem;">Safety Invariant & Architecture:</div>
+                <div style="font-size:0.9rem; color:#374151; line-height:1.5;">
+                    The AI drafts candidate proposals from plain English instructions. PayWise's deterministic engine independently verifies schemas, computes in-memory consequence simulations, and enforces mandatory policy rules before any human authorization or commit.
+                </div>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        """).strip()
+        st.markdown(info_markup, unsafe_allow_html=True)
 
         agent_prompt = st.text_area(
             "Natural Language Financial Instruction",
@@ -88,10 +86,10 @@ def render_new_proposal_view(db_path: str):
         with btn_col:
             st.write("")
             st.write("")
-            draft_btn = st.button("✨ Prepare Candidate Proposal", type="primary", use_container_width=True)
+            draft_btn = st.button("✨ Draft Candidate Proposal", type="primary", use_container_width=True)
 
         if draft_btn:
-            with st.spinner("Agent interpreting intent & retrieving approved financial records..."):
+            with st.spinner("AI drafting proposal based on verified suppliers and open invoices..."):
                 sup_dicts = [s.model_dump() for s in suppliers]
                 inv_dicts = [i.model_dump() for i in invoices]
                 candidate = ai_adapter.generate_proposal_from_prompt(
@@ -105,20 +103,19 @@ def render_new_proposal_view(db_path: str):
         if "candidate_draft" in st.session_state:
             candidate = st.session_state["candidate_draft"]
             st.markdown("---")
-            st.markdown("#### 📄 Candidate Proposal Draft (Untrusted Candidate)")
+            st.markdown("#### 📄 Candidate Proposal Draft (Awaiting Simulation)")
 
             with st.container(border=True):
-                c1, c2 = st.columns([2, 1])
+                c1, c2 = st.columns([2.5, 1])
                 with c1:
                     st.markdown(f"**Title**: {candidate.title}")
                     st.caption(f"Source: `{candidate.source}` • Initiator: `{candidate.created_by}`")
                     st.write(candidate.description)
                 with c2:
                     total_cand = sum(t.amount for t in candidate.transactions)
-                    st.markdown(f"<h3 style='margin:0; text-align:right;'>{format_inr(total_cand)}</h3>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:right; font-weight:700; font-size:1.4rem; color:#172554;'>{format_inr(total_cand)}</div>", unsafe_allow_html=True)
                     st.caption(f"Account: `{candidate.account_id}` • Currency: `{candidate.currency}`")
 
-                # Transactions Preview
                 st.markdown("##### Line Items:")
                 for tx in candidate.transactions:
                     st.markdown(f"- **{tx.beneficiary_name}**: {format_inr(tx.amount)} on {tx.proposed_payment_date} (`{tx.description}`)")
@@ -137,17 +134,17 @@ def render_new_proposal_view(db_path: str):
                         del st.session_state["candidate_draft"]
                         st.rerun()
 
-    # TAB 2: PRESET DEMO SCENARIOS
+    # TAB 2: PRESET TEST SCENARIOS
     with tab_presets:
         st.subheader("Interactive Safety Gate Scenarios")
-        st.write("Load pre-configured test scenarios to demonstrate how PayWise simulates, blocks, or escalates financial risks.")
+        st.write("Load pre-configured test scenarios to verify how PayWise simulates, blocks, or escalates financial risks.")
 
         p1, p2, p3 = st.columns(3)
 
         with p1:
             with st.container(border=True):
                 st.markdown("### 🟢 Safe Vendor Settlement")
-                st.write("A routine disbursement matching an approved invoice within normal operating budget.")
+                st.write("Routine disbursement matching an approved invoice within normal operating liquidity.")
                 st.markdown("- **Beneficiary**: Bharti Airtel Enterprise Ltd\n- **Amount**: ₹28,500.00\n- **Account**: HDFC Main Account\n- **Expected Outcome**: Pass without blocks or approvals.")
                 if st.button("Load Safe Batch", key="btn_preset_safe", type="primary", use_container_width=True):
                     tx = ProposedTransaction(
@@ -208,7 +205,7 @@ def render_new_proposal_view(db_path: str):
             with st.container(border=True):
                 st.markdown("### 🔴 Multi-Risk Safety Barrier")
                 st.write("Disbursement attempting to settle a cancelled facility contract and an already-settled invoice.")
-                st.markdown("- **Transactions**: 2 items\n- **Amount**: ₹44,000.00\n- **Policy Violations**: Cancelled invoice, Suspended payee\n- **Expected Outcome**: Immediate BLOCK.")
+                st.markdown("- **Transactions**: 2 line items\n- **Amount**: ₹44,000.00\n- **Policy Violations**: Cancelled invoice, Duplicate payee\n- **Expected Outcome**: Immediate BLOCK.")
                 if st.button("Load Risky Batch", key="btn_preset_risky", use_container_width=True):
                     tx1 = ProposedTransaction(
                         id=f"TX-RISK-{date.today().strftime('%Y%m%d')}-01",
@@ -248,7 +245,7 @@ def render_new_proposal_view(db_path: str):
 
     # TAB 3: MANUAL TRANSACTION BUILDER
     with tab_manual:
-        st.subheader("Manual Transaction Builder")
+        st.subheader("Manual Proposal Entry")
         with st.form("manual_proposal_form_v2"):
             col1, col2 = st.columns(2)
             with col1:

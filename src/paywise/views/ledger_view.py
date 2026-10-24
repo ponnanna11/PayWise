@@ -1,5 +1,5 @@
 """
-Ledger View for PayWise.
+Simulated Ledger View for PayWise.
 Displays simulated bank accounts, supplier directory, and accounts payable invoices.
 """
 import streamlit as st
@@ -9,15 +9,14 @@ from paywise.repositories.invoice_repo import InvoiceRepository
 from paywise.repositories.supplier_repo import SupplierRepository
 from paywise.utils.formatters import format_inr, format_date
 from paywise.utils.seed_data import seed_database
-from paywise.views.components import render_page_header, render_simulation_banner, render_empty_state
+from paywise.views.components import render_page_header, render_empty_state
 
 
 def render_ledger_view(db_path: str):
     render_page_header(
-        "Simulated Financial Ledger",
-        "Inspection view of simulated corporate bank accounts, verified suppliers directory, and accounts payable invoices.",
+        "Simulated Ledger",
+        "Simulated corporate bank accounts, verified suppliers directory, and accounts payable invoices.",
     )
-    render_simulation_banner()
 
     acc_repo = AccountRepository(db_path)
     sup_repo = SupplierRepository(db_path)
@@ -44,10 +43,26 @@ def render_ledger_view(db_path: str):
                 "Mandatory Reserve": format_inr(a.reserved_balance),
                 "Available Funds": format_inr(a.available_funds),
                 "Status": a.status.value,
-                "Version": a.version,
+                "Version": f"v{a.version}",
                 "Last Updated": format_date(a.updated_at),
             })
-        st.dataframe(pd.DataFrame(acc_data), use_container_width=True, hide_index=True)
+        st.dataframe(
+            pd.DataFrame(acc_data),
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Account ID": st.column_config.TextColumn("Account ID", width="small"),
+                "Bank Institution": st.column_config.TextColumn("Bank", width="small"),
+                "Account Name": st.column_config.TextColumn("Account Name", width="medium"),
+                "Account Number": st.column_config.TextColumn("Account #", width="small"),
+                "Current Balance": st.column_config.TextColumn("Current Balance", width="small"),
+                "Mandatory Reserve": st.column_config.TextColumn("Mandatory Reserve", width="small"),
+                "Available Funds": st.column_config.TextColumn("Available Funds", width="small"),
+                "Status": st.column_config.TextColumn("Status", width="small"),
+                "Version": st.column_config.TextColumn("Version", width="small"),
+                "Last Updated": st.column_config.TextColumn("Last Updated", width="small"),
+            },
+        )
 
     with tab_sup:
         st.subheader("Suppliers Directory & KYC Risk Profiles")
@@ -65,7 +80,22 @@ def render_ledger_view(db_path: str):
                 "Risk Tier": s.risk_tier.value,
                 "Category": s.default_category,
             })
-        st.dataframe(pd.DataFrame(sup_data), use_container_width=True, hide_index=True)
+        st.dataframe(
+            pd.DataFrame(sup_data),
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Supplier ID": st.column_config.TextColumn("Supplier ID", width="small"),
+                "Legal Name": st.column_config.TextColumn("Legal Name", width="medium"),
+                "GSTIN": st.column_config.TextColumn("GSTIN", width="small"),
+                "PAN": st.column_config.TextColumn("PAN", width="small"),
+                "IFSC Code": st.column_config.TextColumn("IFSC Code", width="small"),
+                "Bank Account Number": st.column_config.TextColumn("Bank Account #", width="medium"),
+                "Compliance Status": st.column_config.TextColumn("Status", width="small"),
+                "Risk Tier": st.column_config.TextColumn("Risk Tier", width="small"),
+                "Category": st.column_config.TextColumn("Category", width="small"),
+            },
+        )
 
     with tab_inv:
         st.subheader("Accounts Payable Invoices")
@@ -83,7 +113,22 @@ def render_ledger_view(db_path: str):
                 "Description": i.description or "-",
                 "Paid Timestamp": format_date(i.paid_at) if i.paid_at else "-",
             })
-        st.dataframe(pd.DataFrame(inv_data), use_container_width=True, hide_index=True)
+        st.dataframe(
+            pd.DataFrame(inv_data),
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Invoice ID": st.column_config.TextColumn("Invoice ID", width="small"),
+                "Invoice Reference #": st.column_config.TextColumn("Reference #", width="small"),
+                "Supplier ID": st.column_config.TextColumn("Supplier ID", width="small"),
+                "Invoice Amount": st.column_config.TextColumn("Amount", width="small"),
+                "Issue Date": st.column_config.TextColumn("Issue Date", width="small"),
+                "Due Date": st.column_config.TextColumn("Due Date", width="small"),
+                "Status": st.column_config.TextColumn("Status", width="small"),
+                "Description": st.column_config.TextColumn("Description", width="large"),
+                "Paid Timestamp": st.column_config.TextColumn("Paid Date", width="small"),
+            },
+        )
 
     with tab_reset:
         st.subheader("Re-seed Synthetic Demo Ledger")

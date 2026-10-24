@@ -32,8 +32,8 @@ def test_apptest_loads_dashboard_without_exception():
     at = AppTest.from_file(APP_PATH, default_timeout=30)
     at.run()
     assert not at.exception
-    # Check that navigation radio exists
-    assert len(at.sidebar.radio) > 0
+    # Check that navigation buttons exist in sidebar
+    assert len(at.sidebar.button) >= 9
 
 
 def test_apptest_navigation_all_pages():
@@ -42,19 +42,22 @@ def test_apptest_navigation_all_pages():
     at.run()
     assert not at.exception
 
-    # Available nav options in sidebar radio
+    # Available nav pages
     pages = [
         "Dashboard",
-        "Proposals",
-        "New Proposal",
+        "Payment Proposals",
+        "Create Proposal",
         "Simulation & Preview",
         "Approvals",
-        "Policy Management",
-        "Ledger",
+        "Safety Policies",
+        "Simulated Ledger",
         "Audit Trail",
         "System Information",
     ]
 
     for page_name in pages:
-        at.sidebar.radio[0].set_value(page_name).run()
+        # Find matching button in sidebar and click
+        matching = [b for b in at.sidebar.button if page_name in b.label or page_name in b.key]
+        assert len(matching) > 0, f"Button for page {page_name} not found"
+        matching[0].click().run()
         assert not at.exception, f"Exception occurred while rendering page: {page_name}"

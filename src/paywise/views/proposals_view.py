@@ -1,5 +1,5 @@
 """
-Proposals View for PayWise.
+Payment Proposals View for PayWise.
 Enables filtering, searching, inspecting, and triggering simulations on financial proposals.
 """
 import streamlit as st
@@ -12,8 +12,8 @@ from paywise.views.components import render_page_header, render_status_badge, re
 
 def render_proposals_view(db_path: str):
     render_page_header(
-        "Financial Proposals & Batches",
-        "Review, inspect, filter, and simulate financial disbursement requests prepared by AI agents or finance operators.",
+        "Payment Proposals",
+        "Review, inspect, filter, and simulate disbursement requests prepared by AI agents or finance operators.",
     )
 
     prop_service = ProposalService(db_path)
@@ -70,7 +70,7 @@ def render_proposals_view(db_path: str):
                     st.write(prop.description)
 
             with h_col2:
-                st.markdown(f"<h3 style='margin:0; text-align:right;'>{format_inr(prop.total_amount)}</h3>", unsafe_allow_html=True)
+                st.markdown(f"<div style='text-align:right; font-weight:700; font-size:1.35rem; color:#172554;'>{format_inr(prop.total_amount)}</div>", unsafe_allow_html=True)
                 st.markdown(
                     f"<div style='text-align:right; margin-top:0.35rem;'>{render_status_badge(prop.status.value)}</div>",
                     unsafe_allow_html=True,
@@ -78,7 +78,7 @@ def render_proposals_view(db_path: str):
                 if findings_count > 0:
                     badge_color = "#DC2626" if has_block else "#D97706"
                     st.markdown(
-                        f"<p style='font-size:0.775rem; text-align:right; color:{badge_color}; margin-top:0.25rem; font-weight:600;'>{findings_count} Policy Finding(s)</p>",
+                        f"<p style='font-size:0.825rem; text-align:right; color:{badge_color}; margin-top:0.35rem; font-weight:600;'>{findings_count} Policy Finding(s)</p>",
                         unsafe_allow_html=True,
                     )
 
@@ -101,8 +101,7 @@ def render_proposals_view(db_path: str):
                         st.rerun()
 
             # Expandable transaction breakdown
-            with st.expander(f"📑 Transactions ({len(prop.transactions)}) & Deterministic Hashes", expanded=False):
-                st.code(f"Proposal SHA-256 Hash: {prop.proposal_hash or 'Simulate to generate hash'}", language="text")
+            with st.expander(f"📑 Transactions ({len(prop.transactions)}) & Line Item Breakdown", expanded=False):
                 tx_data = []
                 for t in prop.transactions:
                     tx_data.append({
@@ -116,4 +115,19 @@ def render_proposals_view(db_path: str):
                         "Category": t.transaction_category,
                         "Description": t.description,
                     })
-                st.dataframe(pd.DataFrame(tx_data), use_container_width=True, hide_index=True)
+                st.dataframe(
+                    pd.DataFrame(tx_data),
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "TX ID": st.column_config.TextColumn("TX ID", width="small"),
+                        "Type": st.column_config.TextColumn("Type", width="small"),
+                        "Beneficiary": st.column_config.TextColumn("Beneficiary", width="medium"),
+                        "Supplier ID": st.column_config.TextColumn("Supplier ID", width="small"),
+                        "Invoice ID": st.column_config.TextColumn("Invoice ID", width="small"),
+                        "Amount": st.column_config.TextColumn("Amount", width="small"),
+                        "Date": st.column_config.TextColumn("Date", width="small"),
+                        "Category": st.column_config.TextColumn("Category", width="small"),
+                        "Description": st.column_config.TextColumn("Description", width="large"),
+                    },
+                )

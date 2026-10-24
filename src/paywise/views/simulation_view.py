@@ -13,7 +13,6 @@ from paywise.services.proposal_service import ProposalService
 from paywise.utils.formatters import format_inr, format_date
 from paywise.views.components import (
     render_page_header,
-    render_simulation_banner,
     render_status_badge,
     render_before_after_comparison,
     render_severity_callout,
@@ -24,9 +23,8 @@ from paywise.views.components import (
 def render_simulation_view(db_path: str):
     render_page_header(
         "Simulation & Consequence Preview",
-        "Deterministic virtual projection: S' = f(S, A) and policy evaluation: R = g(S, S', A, P).",
+        "Deterministic virtual projection: S' = f(S, A) and policy evaluation: R = g(S, S', A, P)",
     )
-    render_simulation_banner()
 
     prop_service = ProposalService(db_path)
     prop_repo = ProposalRepository(db_path)
@@ -38,7 +36,7 @@ def render_simulation_view(db_path: str):
     if not all_proposals:
         render_empty_state(
             "No Proposals Available",
-            "Create a new proposal in 'New Proposal' to model financial consequences.",
+            "Create a new proposal in 'Create Proposal' to model financial consequences.",
             icon="🔬",
         )
         return
@@ -87,15 +85,15 @@ def render_simulation_view(db_path: str):
             if proposal.description:
                 st.write(proposal.description)
         with p2:
-            st.markdown(f"<p style='font-size:0.8rem; color:#64748B; margin-bottom:0.1rem; text-transform:uppercase; font-weight:600;'>Proposed Outflow</p>", unsafe_allow_html=True)
-            st.markdown(f"<h3 style='margin:0;'>{format_inr(preview.total_outflow)}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<p style='font-size:0.825rem; color:#526581; margin-bottom:0.1rem; text-transform:uppercase; font-weight:600;'>Proposed Outflow</p>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-weight:700; font-size:1.4rem; color:#172554;'>{format_inr(preview.total_outflow)}</div>", unsafe_allow_html=True)
         with p3:
-            st.markdown(f"<p style='font-size:0.8rem; color:#64748B; margin-bottom:0.1rem; text-transform:uppercase; font-weight:600;'>Governance Status</p>", unsafe_allow_html=True)
+            st.markdown(f"<p style='font-size:0.825rem; color:#526581; margin-bottom:0.1rem; text-transform:uppercase; font-weight:600;'>Governance Status</p>", unsafe_allow_html=True)
             st.markdown(f"{render_status_badge(status_val)}", unsafe_allow_html=True)
             st.caption(f"Simulated: {format_date(preview.simulated_at)}")
 
     # 2. Before-and-After Financial Comparison Grid
-    st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)
     st.markdown("#### 📊 Deterministic State Projection (Before vs After)")
     render_before_after_comparison(
         current_balance=preview.current_balance,
@@ -108,7 +106,7 @@ def render_simulation_view(db_path: str):
     )
 
     # 3. Policy Findings & AI Executive Explanation
-    st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
     f_head1, f_head2 = st.columns([2, 1])
     with f_head1:
         st.markdown(f"#### 🛡️ Policy Engine Safety Findings ({len(preview.findings)})")
@@ -171,7 +169,7 @@ def render_simulation_view(db_path: str):
                 )
 
     # 4. Transaction-by-Transaction Breakdown Table
-    st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
     st.markdown("#### 📑 Transaction-Level Breakdown")
     tx_table = []
     for tx in proposal.transactions:
@@ -187,10 +185,26 @@ def render_simulation_view(db_path: str):
             "Outcome": outcome.status if outcome else "PROPOSED",
             "Projected Balance After": format_inr(outcome.projected_post_balance) if outcome else "-",
         })
-    st.dataframe(pd.DataFrame(tx_table), use_container_width=True, hide_index=True)
+    df_tx = pd.DataFrame(tx_table)
+    st.dataframe(
+        df_tx,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Transaction ID": st.column_config.TextColumn("Transaction ID", width="small"),
+            "Beneficiary": st.column_config.TextColumn("Beneficiary", width="medium"),
+            "Supplier ID": st.column_config.TextColumn("Supplier ID", width="small"),
+            "Invoice ID": st.column_config.TextColumn("Invoice ID", width="small"),
+            "Amount": st.column_config.TextColumn("Amount", width="small"),
+            "Execution Date": st.column_config.TextColumn("Date", width="small"),
+            "Category": st.column_config.TextColumn("Category", width="small"),
+            "Outcome": st.column_config.TextColumn("Outcome", width="small"),
+            "Projected Balance After": st.column_config.TextColumn("Projected Balance After", width="medium"),
+        },
+    )
 
     # 5. Cryptographic State Binding
-    with st.expander("🔒 Cryptographic Hashes & Deterministic Binding", expanded=False):
+    with st.expander("🔒 Cryptographic Hashes & Deterministic State Fingerprints", expanded=False):
         c1, c2 = st.columns(2)
         with c1:
             st.text_input("Canonical Proposal Hash", value=preview.proposal_hash, disabled=True)
@@ -200,7 +214,7 @@ def render_simulation_view(db_path: str):
             st.text_input("Active Policy Set Hash", value=preview.policy_set_hash, disabled=True)
 
     # 6. Action Execution Console
-    st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
     st.markdown("#### ⚡ Execution & Approval Gateways")
 
     if status_val == "COMMITTED_SIMULATED":

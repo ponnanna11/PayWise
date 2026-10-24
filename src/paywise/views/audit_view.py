@@ -12,7 +12,7 @@ from paywise.views.components import render_page_header, render_empty_state
 def render_audit_view(db_path: str):
     render_page_header(
         "Governance Audit Trail",
-        "Chronological, immutable application event log capturing proposal lifecycle transitions, safety findings, approvals, and commits.",
+        "Chronological, immutable event log capturing proposal lifecycles, policy interceptions, approvals, and commits.",
     )
 
     audit_repo = AuditRepository(db_path)
@@ -64,7 +64,20 @@ def render_audit_view(db_path: str):
             "Actor": ev.actor,
             "Outcome": ev.outcome,
         })
-    st.dataframe(pd.DataFrame(table_rows), use_container_width=True, hide_index=True)
+    df_audit = pd.DataFrame(table_rows)
+    st.dataframe(
+        df_audit,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Audit ID": st.column_config.TextColumn("Audit ID", width="small"),
+            "Timestamp": st.column_config.TextColumn("Timestamp", width="small"),
+            "Event Type": st.column_config.TextColumn("Event Type", width="medium"),
+            "Proposal ID": st.column_config.TextColumn("Proposal ID", width="small"),
+            "Actor": st.column_config.TextColumn("Actor", width="small"),
+            "Outcome": st.column_config.TextColumn("Outcome", width="small"),
+        },
+    )
 
     # Detailed Inspector
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)

@@ -5,17 +5,18 @@ and embedded PlantUML architecture diagrams.
 """
 from pathlib import Path
 import os
+import textwrap
 import streamlit as st
 from paywise.config import AI_MODEL, AI_PROVIDER, DB_PATH, DEFAULT_CURRENCY, GEMINI_API_KEY
 from paywise.services.ai_adapter import AIAdapter
-from paywise.views.components import render_page_header, render_ai_status_card
+from paywise.views.components import render_page_header, render_ai_status_card, render_metric_card
 
 DIAGRAMS_DIR = Path(__file__).resolve().parent.parent.parent.parent / "docs" / "diagrams"
 
 
 def render_architecture_view():
     render_page_header(
-        "System Architecture & Diagnostics",
+        "System Information & Diagnostics",
         "Technical blueprints, runtime health checks, PlantUML diagrams, and formal safety invariants.",
     )
 
@@ -26,83 +27,46 @@ def render_architecture_view():
     st.subheader("⚙️ Runtime Environment & AI Diagnostics")
     render_ai_status_card(health)
 
+    db_exists = os.path.exists(DB_PATH)
+    db_size_kb = os.path.getsize(DB_PATH) / 1024 if db_exists else 0
+    api_status = "CONFIGURED" if GEMINI_API_KEY else "UNCONFIGURED"
+    api_color = "#15803D" if GEMINI_API_KEY else "#D97706"
+
     h1, h2, h3, h4 = st.columns(4)
     with h1:
-        st.markdown(
-            f"""
-            <div class="pw-metric-card">
-                <div class="pw-metric-label">Application Version</div>
-                <div class="pw-metric-value" style="font-size:1.3rem;">v1.0.0</div>
-                <div class="pw-metric-subtext">Simulation Prototype</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        render_metric_card("Application Version", "v1.0.0", "Simulation Gateway Prototype")
     with h2:
-        db_exists = os.path.exists(DB_PATH)
-        db_size_kb = os.path.getsize(DB_PATH) / 1024 if db_exists else 0
-        st.markdown(
-            f"""
-            <div class="pw-metric-card">
-                <div class="pw-metric-label">Database Health</div>
-                <div class="pw-metric-value" style="font-size:1.3rem; color:#0D9488;">ONLINE</div>
-                <div class="pw-metric-subtext">SQLite ({db_size_kb:.1f} KB)</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        render_metric_card("Database Health", "ONLINE", f"SQLite ({db_size_kb:.1f} KB)", value_color="#15803D")
     with h3:
-        api_status = "KEY_CONFIGURED" if GEMINI_API_KEY else "UNCONFIGURED"
-        api_color = "#0D9488" if GEMINI_API_KEY else "#D97706"
-        st.markdown(
-            f"""
-            <div class="pw-metric-card">
-                <div class="pw-metric-label">Gemini API Key</div>
-                <div class="pw-metric-value" style="font-size:1.3rem; color:{api_color};">{api_status}</div>
-                <div class="pw-metric-subtext">Environment Variable</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        render_metric_card("Gemini API Key", api_status, "Environment Configured", value_color=api_color)
     with h4:
-        st.markdown(
-            f"""
-            <div class="pw-metric-card">
-                <div class="pw-metric-label">Base Currency</div>
-                <div class="pw-metric-value" style="font-size:1.3rem;">{DEFAULT_CURRENCY} (₹)</div>
-                <div class="pw-metric-subtext">Indian Lakh/Crore</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        render_metric_card("Base Currency", f"{DEFAULT_CURRENCY} (₹)", "Indian Numbering", value_color="#172554")
 
     # Core Principles Banner
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
     with st.container(border=True):
-        st.markdown(
-            """
-            ### 🛡️ Core Operating Principle
-            <div style="font-size:1.1rem; font-weight:600; color:#1E3A8A; background-color:#EFF6FF; padding:1rem; border-radius:8px; border-left:4px solid #2563EB;">
-            "AI proposes. PayWise simulates. Policies enforce. Humans approve. Revalidation protects."
+        st.markdown("### 🛡️ Core Operating Principle")
+        
+        box_markup = textwrap.dedent("""
+            <div style="font-size:1.05rem; font-weight:600; color:#172554; background-color:#EFF6FF; padding:1.1rem; border-radius:8px; border-left:4px solid #2563EB; margin-bottom:1rem;">
+                "AI proposes. PayWise simulates. Policies enforce. Humans approve. Revalidation protects."
             </div>
-            
-            <div style="margin-top:0.85rem; color:#334155; font-size:0.9rem; line-height:1.6;">
-            PayWise is a <b>pre-execution safety gateway</b> for AI-assisted financial operations. The AI agent operates in an untrusted sandbox:
-            <ul>
-                <li>The AI must <b>never directly modify the ledger</b>.</li>
-                <li>The AI must <b>never bypass the policy engine</b>.</li>
-                <li>The AI must <b>never grant itself approval</b>.</li>
-                <li>The AI must <b>never activate its own proposed policies</b>.</li>
-                <li>Every commit undergoes <b>cryptographic commit-time revalidation</b> to prevent stale state execution.</li>
-            </ul>
+            <div style="color:#374151; font-size:0.925rem; line-height:1.6;">
+                PayWise operates as a <b>pre-execution safety gateway</b> for AI-assisted financial operations in an isolated virtual sandbox:
+                <ul style="margin-top:0.5rem; margin-bottom:0.5rem;">
+                    <li>The AI must <b>never directly modify the ledger</b>.</li>
+                    <li>The AI must <b>never bypass the policy engine</b>.</li>
+                    <li>The AI must <b>never grant itself approval</b>.</li>
+                    <li>The AI must <b>never activate its own proposed policies</b>.</li>
+                    <li>Every commit undergoes <b>cryptographic commit-time revalidation</b> to prevent stale state execution.</li>
+                </ul>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        """).strip()
+        st.markdown(box_markup, unsafe_allow_html=True)
 
     # Architecture Diagrams
     st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
-    st.subheader("📐 PlantUML Architecture Diagrams")
+    st.subheader("📐 Architecture & Engineering Diagrams")
 
     diag_tabs = st.tabs([
         "1. System Architecture",

@@ -19,7 +19,7 @@ from paywise.views.components import (
 
 def render_approvals_view(db_path: str):
     render_page_header(
-        "Executive Authorization Console",
+        "Approvals & Executive Authorization",
         "Role-aware governance workflow binding approvals cryptographically to exact proposal and ledger hashes.",
     )
 
@@ -46,7 +46,7 @@ def render_approvals_view(db_path: str):
             else:
                 st.success(f"✅ **Authorized Signatory ({selected_role})**: Eligible to review and approve high-value batches and policy exceptions.")
 
-    st.markdown("<div style='margin-top: 1rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-top: 1.25rem;'></div>", unsafe_allow_html=True)
 
     # Proposals Awaiting Approval
     awaiting_proposals = [p for p in prop_repo.list_all() if p.status.value in ["AWAITING_APPROVAL", "STALE"]]
@@ -56,7 +56,7 @@ def render_approvals_view(db_path: str):
     if not awaiting_proposals:
         render_empty_state(
             "No Authorizations Pending",
-            "There are currently no proposals awaiting executive sign-off.",
+            "There are currently no financial proposals awaiting executive sign-off.",
             icon="✍️",
         )
     else:
@@ -70,7 +70,7 @@ def render_approvals_view(db_path: str):
                     if prop.description:
                         st.write(prop.description)
                 with h2:
-                    st.markdown(f"<h3 style='margin:0; text-align:right;'>{format_inr(prop.total_amount)}</h3>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='text-align:right; font-weight:700; font-size:1.4rem; color:#172554;'>{format_inr(prop.total_amount)}</div>", unsafe_allow_html=True)
                     st.caption(f"Disbursement Account: `{prop.account_id}`")
 
                 # Show preview findings triggering approval
@@ -88,7 +88,7 @@ def render_approvals_view(db_path: str):
 
                 # Cryptographic Hash preview
                 if preview:
-                    with st.expander("🔐 Cryptographic Binding Verification", expanded=False):
+                    with st.expander("🔐 Cryptographic Hash Binding", expanded=False):
                         st.code(
                             f"Proposal Hash:   {prop.proposal_hash}\n"
                             f"Ledger Hash:     {preview.ledger_state_hash}\n"
@@ -98,7 +98,7 @@ def render_approvals_view(db_path: str):
 
                 # Approval Decision Form
                 if selected_role == "BUSINESS_USER":
-                    st.info("ℹ️ Switch role above to an authorized manager to submit an approval decision.")
+                    st.info("ℹ️ Switch role above to an authorized officer (CFO, Finance Manager, Controller) to authorize this disbursement.")
                 else:
                     with st.form(key=f"appr_form_{prop.id}"):
                         justification = st.text_area(
@@ -174,4 +174,19 @@ def render_approvals_view(db_path: str):
     if not approval_records:
         render_empty_state("No Signed Approvals", "No historical approval decisions recorded yet.", icon="✍️")
     else:
-        st.dataframe(pd.DataFrame(approval_records), use_container_width=True, hide_index=True)
+        df_approvals = pd.DataFrame(approval_records)
+        st.dataframe(
+            df_approvals,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Approval ID": st.column_config.TextColumn("Approval ID", width="small"),
+                "Proposal ID": st.column_config.TextColumn("Proposal ID", width="small"),
+                "Approver": st.column_config.TextColumn("Approver", width="medium"),
+                "Role": st.column_config.TextColumn("Role", width="small"),
+                "Decision": st.column_config.TextColumn("Decision", width="small"),
+                "Status": st.column_config.TextColumn("Status", width="medium"),
+                "Date": st.column_config.TextColumn("Date", width="small"),
+                "Justification": st.column_config.TextColumn("Justification", width="large"),
+            },
+        )

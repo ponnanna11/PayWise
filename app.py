@@ -5,6 +5,7 @@ Main Streamlit Application Entrypoint
 """
 import os
 import sys
+import textwrap
 from pathlib import Path
 
 # Ensure src is in Python path for local execution and Streamlit
@@ -46,7 +47,7 @@ def setup_database():
 
 setup_database()
 
-# Apply custom SaaS stylesheet
+# Apply custom light fintech stylesheet
 apply_custom_styles()
 
 # Sidebar Navigation
@@ -54,68 +55,70 @@ logo_path = Path(__file__).parent / "assets" / "paywise_logo.png"
 
 with st.sidebar:
     if logo_path.exists():
-        st.image(str(logo_path), width=240)
+        st.image(str(logo_path), width=230)
     else:
         st.markdown("## 🛡️ **PayWise**")
         st.caption("Simulate Before You Pay")
 
-    st.markdown("<div style='margin-bottom:0.75rem;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin-bottom: 0.75rem;'></div>", unsafe_allow_html=True)
 
-    nav_icons = {
-        "Dashboard": "📊 Dashboard",
-        "Proposals": "📋 Proposals",
-        "New Proposal": "🤖 Agent Operations",
-        "Simulation & Preview": "🔬 Simulation & Preview",
-        "Approvals": "✍️ Approvals",
-        "Policy Management": "🛡️ Policy Management",
-        "Ledger": "🏦 Simulated Ledger",
-        "Audit Trail": "📜 Audit Trail",
-        "System Information": "⚙️ System Information",
-    }
+    nav_items = [
+        ("Dashboard", "📊  Dashboard"),
+        ("Payment Proposals", "📋  Payment Proposals"),
+        ("Create Proposal", "✨  Create Proposal"),
+        ("Simulation & Preview", "🔬  Simulation & Preview"),
+        ("Approvals", "✍️  Approvals"),
+        ("Safety Policies", "🛡️  Safety Policies"),
+        ("Simulated Ledger", "🏦  Simulated Ledger"),
+        ("Audit Trail", "📜  Audit Trail"),
+        ("System Information", "⚙️  System Information"),
+    ]
 
-    nav_options = list(nav_icons.keys())
+    if "current_page" not in st.session_state:
+        st.session_state["current_page"] = "Dashboard"
 
-    current_page = st.session_state.get("current_page", "Dashboard")
-    if current_page not in nav_options:
+    current_page = st.session_state["current_page"]
+    nav_keys = [item[0] for item in nav_items]
+    if current_page not in nav_keys:
         current_page = "Dashboard"
+        st.session_state["current_page"] = "Dashboard"
 
-    selected_page = st.radio(
-        "Navigation",
-        nav_options,
-        index=nav_options.index(current_page),
-        format_func=lambda x: nav_icons.get(x, x),
-        key="nav_radio",
-    )
-    st.session_state["current_page"] = selected_page
+    for key, label in nav_items:
+        is_active = (key == current_page)
+        btn_type = "primary" if is_active else "secondary"
+        if st.button(label, key=f"nav_btn_{key}", type=btn_type, use_container_width=True):
+            if current_page != key:
+                st.session_state["current_page"] = key
+                st.rerun()
 
+    st.markdown("<div style='margin-top: 1.5rem;'></div>", unsafe_allow_html=True)
     st.markdown("---")
-    st.markdown(
-        """
-        <div style="font-size: 0.8rem; color: #64748B; line-height: 1.5; background: #F8FAFC; padding: 0.75rem; border-radius: 6px; border: 1px solid #E2E8F0;">
-            <b style="color:#0F172A;">Core Safety Invariant:</b><br>
+
+    footer_markup = textwrap.dedent("""
+        <div style="font-size: 0.825rem; color: #526581; line-height: 1.5; background: #F5F8FF; padding: 0.85rem; border-radius: 8px; border: 1px solid #DCE6F5;">
+            <b style="color:#172554;">Core Safety Invariant:</b><br>
             <i>AI proposes. PayWise simulates. Policies enforce. Humans approve. Revalidation protects.</i>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    """).strip()
+    st.markdown(footer_markup, unsafe_allow_html=True)
     st.caption("PayWise v1.0.0 • SQLite • Simulation Only")
 
-# Router
-page = st.session_state["current_page"]
+# Page Router
+page = st.session_state.get("current_page", "Dashboard")
 
 if page == "Dashboard":
     render_dashboard(DB_PATH)
-elif page == "Proposals":
+elif page == "Payment Proposals":
     render_proposals_view(DB_PATH)
-elif page == "New Proposal":
+elif page == "Create Proposal":
     render_new_proposal_view(DB_PATH)
 elif page == "Simulation & Preview":
     render_simulation_view(DB_PATH)
 elif page == "Approvals":
     render_approvals_view(DB_PATH)
-elif page == "Policy Management":
+elif page == "Safety Policies":
     render_policies_view(DB_PATH)
-elif page == "Ledger":
+elif page == "Simulated Ledger":
     render_ledger_view(DB_PATH)
 elif page == "Audit Trail":
     render_audit_view(DB_PATH)
