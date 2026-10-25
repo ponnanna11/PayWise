@@ -29,6 +29,7 @@ ENV/
 # Environments and Secrets
 .env
 .env.local
+.streamlit/secrets.toml
 
 # Database (keep schema and initialization, exclude populated db files)
 *.db

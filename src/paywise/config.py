@@ -10,21 +10,32 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+def _get_setting(key: str, default: str = "") -> str:
+    """Retrieve setting from Streamlit secrets (cloud) or environment variables (local)."""
+    try:
+        import streamlit as st
+        if hasattr(st, "secrets") and key in st.secrets:
+            return str(st.secrets[key])
+    except Exception:
+        pass
+    return os.getenv(key, default)
+
+
 # Database configuration
-DB_PATH = os.getenv("PAYWISE_DB_PATH", str(BASE_DIR / "data" / "paywise_sim.db"))
-DEFAULT_CURRENCY = os.getenv("PAYWISE_DEFAULT_CURRENCY", "INR")
+DB_PATH = _get_setting("PAYWISE_DB_PATH", str(BASE_DIR / "data" / "paywise_sim.db"))
+DEFAULT_CURRENCY = _get_setting("PAYWISE_DEFAULT_CURRENCY", "INR")
 
 # AI Integration Configuration
 # Check GEMINI_API_KEY, GOOGLE_API_KEY, or PAYWISE_AI_API_KEY
 GEMINI_API_KEY = (
-    os.getenv("GEMINI_API_KEY")
-    or os.getenv("GOOGLE_API_KEY")
-    or os.getenv("PAYWISE_AI_API_KEY")
+    _get_setting("GEMINI_API_KEY")
+    or _get_setting("GOOGLE_API_KEY")
+    or _get_setting("PAYWISE_AI_API_KEY")
     or ""
 )
 
-AI_PROVIDER = os.getenv("PAYWISE_AI_PROVIDER", "gemini" if GEMINI_API_KEY else "fallback")
-AI_MODEL = os.getenv("PAYWISE_AI_MODEL", "gemini-2.5-flash")
+AI_PROVIDER = _get_setting("PAYWISE_AI_PROVIDER", "gemini" if GEMINI_API_KEY else "fallback")
+AI_MODEL = _get_setting("PAYWISE_AI_MODEL", "gemini-2.5-flash")
 
 # Currency symbols
 CURRENCY_SYMBOLS = {
