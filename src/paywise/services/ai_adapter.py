@@ -9,6 +9,7 @@ from datetime import date, timedelta
 import json
 import logging
 import re
+import uuid
 from typing import Any, Dict, List, Optional
 
 from paywise.config import AI_MODEL, AI_PROVIDER, GEMINI_API_KEY
@@ -183,7 +184,7 @@ Do not include any explanation outside the JSON code block.
 
             tx_list.append(
                 ProposedTransaction(
-                    id=f"TX-GEMINI-{date.today().strftime('%Y%m%d')}-{i+1}",
+                    id=f"TX-GEMINI-{date.today().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}-{i+1}",
                     transaction_type=TransactionType.SUPPLIER_PAYMENT if t.get("invoice_id") else TransactionType.EXPENSE_REIMBURSEMENT,
                     invoice_id=t.get("invoice_id"),
                     supplier_id=t.get("supplier_id"),
@@ -360,7 +361,7 @@ class DeterministicFallbackProvider(BaseAIProvider):
 
         today = date.today()
         tx = ProposedTransaction(
-            id=f"TX-DET-{today.strftime('%Y%m%d')}-01",
+            id=f"TX-DET-{today.strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}",
             transaction_type=TransactionType.SUPPLIER_PAYMENT if inv_id else TransactionType.EXPENSE_REIMBURSEMENT,
             invoice_id=inv_id,
             supplier_id=sup_id,

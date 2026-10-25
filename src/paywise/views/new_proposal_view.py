@@ -4,6 +4,7 @@ Features AI-assisted proposal creation, interactive safety presets,
 and a deterministic manual transaction builder.
 """
 from datetime import date, timedelta
+import uuid
 import streamlit as st
 from pydantic import ValidationError
 from paywise.models.proposal import (
@@ -149,7 +150,7 @@ def render_new_proposal_view(db_path: str):
                 st.markdown("- **Beneficiary**: Bharti Airtel Enterprise Ltd\n- **Amount**: ₹28,500.00\n- **Account**: HDFC Main Account\n- **Expected Outcome**: Pass without blocks or approvals.")
                 if st.button("Load Safe Batch", key="btn_preset_safe", type="primary", use_container_width=True):
                     tx = ProposedTransaction(
-                        id=f"TX-SAFE-{date.today().strftime('%Y%m%d')}-01",
+                        id=f"TX-SAFE-{date.today().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}",
                         transaction_type=TransactionType.SUPPLIER_PAYMENT,
                         invoice_id="INV-2026-003",
                         supplier_id="SUP-AIRTEL-03",
@@ -179,7 +180,7 @@ def render_new_proposal_view(db_path: str):
                 st.markdown("- **Beneficiary**: Tata Consultancy Services Ltd\n- **Amount**: ₹1,85,000.00\n- **Account**: HDFC Main Account\n- **Expected Outcome**: Triggers REQUIRE_APPROVAL for CFO.")
                 if st.button("Load High-Value Batch", key="btn_preset_high", use_container_width=True):
                     tx = ProposedTransaction(
-                        id=f"TX-HIGH-{date.today().strftime('%Y%m%d')}-01",
+                        id=f"TX-HIGH-{date.today().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}",
                         transaction_type=TransactionType.SUPPLIER_PAYMENT,
                         invoice_id="INV-2026-001",
                         supplier_id="SUP-TCS-01",
@@ -208,8 +209,9 @@ def render_new_proposal_view(db_path: str):
                 st.write("Disbursement attempting to settle a cancelled facility contract and an already-settled invoice.")
                 st.markdown("- **Transactions**: 2 line items\n- **Amount**: ₹44,000.00\n- **Policy Violations**: Cancelled invoice, Duplicate payee\n- **Expected Outcome**: Immediate BLOCK.")
                 if st.button("Load Risky Batch", key="btn_preset_risky", use_container_width=True):
+                    u_suffix = uuid.uuid4().hex[:4].upper()
                     tx1 = ProposedTransaction(
-                        id=f"TX-RISK-{date.today().strftime('%Y%m%d')}-01",
+                        id=f"TX-RISK-{date.today().strftime('%Y%m%d')}-01-{u_suffix}",
                         transaction_type=TransactionType.SUPPLIER_PAYMENT,
                         invoice_id="INV-2026-005",
                         supplier_id="SUP-APEX-04",
@@ -220,7 +222,7 @@ def render_new_proposal_view(db_path: str):
                         description="Payment attempt on cancelled deep cleaning contract",
                     )
                     tx2 = ProposedTransaction(
-                        id=f"TX-RISK-{date.today().strftime('%Y%m%d')}-02",
+                        id=f"TX-RISK-{date.today().strftime('%Y%m%d')}-02-{u_suffix}",
                         transaction_type=TransactionType.SUPPLIER_PAYMENT,
                         invoice_id="INV-2026-004",
                         supplier_id="SUP-AIRTEL-03",
@@ -281,7 +283,7 @@ def render_new_proposal_view(db_path: str):
             if submitted:
                 try:
                     tx = ProposedTransaction(
-                        id=f"TX-{date.today().strftime('%Y%m%d')}-01",
+                        id=f"TX-{date.today().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}",
                         transaction_type=TransactionType(tx_type_str),
                         invoice_id=invoice_id,
                         supplier_id=supplier_id,

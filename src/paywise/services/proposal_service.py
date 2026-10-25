@@ -18,6 +18,7 @@ from paywise.models.simulation import SimulationPreview
 from paywise.repositories.account_repo import AccountRepository
 from paywise.repositories.approval_repo import ApprovalRepository
 from paywise.repositories.audit_repo import AuditRepository
+from paywise.repositories.database import get_connection
 from paywise.repositories.invoice_repo import InvoiceRepository
 from paywise.repositories.policy_repo import PolicyRepository
 from paywise.repositories.proposal_repo import ProposalRepository
@@ -56,15 +57,27 @@ class ProposalService:
 
         prop_id = f"PROP-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
 
-        # Assign proposal_id to transactions if missing
-        assigned_txs = []
-        for i, tx in enumerate(proposal_input.transactions):
-            tx_data = tx.model_dump()
-            tx_data["proposal_id"] = prop_id
-            tx_data["proposal_version"] = 1
-            if not tx_data.get("id"):
-                tx_data["id"] = f"TX-{prop_id}-{i+1}"
-            assigned_txs.append(ProposedTransaction(**tx_data))
+        # Assign proposal_id to transactions and ensure globally unique transaction IDs
+        conn = get_connection(self.db_path)
+        try:
+            assigned_txs = []
+            for i, tx in enumerate(proposal_input.transactions):
+                tx_data = tx.model_dump()
+                tx_data["proposal_id"] = prop_id
+                tx_data["proposal_version"] = 1
+                raw_id = tx_data.get("id")
+                if not raw_id:
+                    tx_data["id"] = f"TX-{prop_id}-{i+1}"
+                else:
+                    # If this transaction ID already exists in the database, make it unique
+                    exists = conn.execute(
+                        "SELECT 1 FROM proposed_transactions WHERE id = ?", (raw_id,)
+                    ).fetchone()
+                    if exists:
+                        tx_data["id"] = f"{raw_id}-{uuid.uuid4().hex[:4].upper()}"
+                assigned_txs.append(ProposedTransaction(**tx_data))
+        finally:
+            conn.close()
 
         proposal = Proposal(
             id=prop_id,
